@@ -147,6 +147,13 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
     };
   }, []);
 
+  // Auto-check for updates when entering the updates section
+  useEffect(() => {
+    if (section === "updates" && !updateStatus) {
+      checkForUpdates();
+    }
+  }, [section]);
+
   const refresh = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -455,6 +462,16 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
     <header className="settings-page-heading"><div><span className="settings-eyebrow">WORKSPACE CONTROL</span><h2>Settings</h2><p>Account security, access, appearance, and Quality assignments.</p></div><button type="button" className="settings-refresh" title="Refresh settings" onClick={() => void refresh()} disabled={loading}><RefreshCw size={15} className={loading ? "is-spinning" : ""} />Refresh</button></header>
     <nav className="settings-tabs" aria-label="Settings sections">{tabs.map(({ id, label, icon: Icon, count }) => <button type="button" key={id} className={section === id ? "active" : ""} onClick={() => { setSection(id); setError(""); setNotice(""); }}><Icon size={16} />{label}{count > 0 && <span>{count}</span>}</button>)}</nav>
     {(error || notice) && <div className={`settings-feedback ${error ? "is-error" : "is-success"}`} role={error ? "alert" : "status"}>{error ? <CircleAlert size={16} /> : <CheckCircle2 size={16} />}{error || notice}</div>}
+    {updateStatus === "available" && <div className="settings-update-notification">
+      <div className="settings-update-notification-content">
+        <Download size={20} />
+        <div>
+          <strong>New update available!</strong>
+          <small>A new version is ready to install. Go to "App updates" to download and install it.</small>
+        </div>
+        <button type="button" className="settings-notification-button" onClick={() => setSection("updates")}>View update</button>
+      </div>
+    </div>}
 
     {section === "profile" && <div className="settings-content-grid">
       <form className="settings-panel settings-profile-panel" onSubmit={saveProfile}>
@@ -538,43 +555,45 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
     </div>}
 
     {section === "updates" && <section className="settings-panel settings-updates-panel">
-      <header className="settings-panel-heading"><span className="settings-panel-icon is-blue"><CloudDownload size={18} /></span><div><h3>App updates</h3><p>Check for and install the latest version of the application.</p></div></header>
+      <header className="settings-panel-heading"><span className="settings-panel-icon is-blue"><CloudDownload size={18} /></span><div><h3>App updates</h3><p>Stay up to date with the latest features and improvements.</p></div></header>
       <div className="settings-update-status">
         {!updateStatus && <div className="settings-update-idle">
           <CloudDownload size={32} />
-          <strong>No update check performed yet</strong>
-          <small>Click "Check for updates" to see if a new version is available.</small>
+          <strong>Check for updates</strong>
+          <small>Click the button below to see if a new version is available.</small>
         </div>}
         {updateStatus === "checking" && <div className="settings-update-checking">
           <RefreshCw size={32} className="is-spinning" />
           <strong>Checking for updates...</strong>
+          <small>Please wait while we check for the latest version.</small>
         </div>}
         {updateStatus === "available" && <div className="settings-update-available">
           <Download size={32} />
-          <strong>Update available</strong>
-          <small>A new version of the application is ready to download.</small>
+          <strong>New update available!</strong>
+          <small>A new version is ready to download. After installation, you'll need to close and reopen the application.</small>
           <button className="settings-primary-button" type="button" onClick={downloadUpdate} disabled={updateStatus === "downloading"}><Download size={15} />Download update</button>
         </div>}
         {updateStatus === "downloading" && <div className="settings-update-downloading">
           <RefreshCw size={32} className="is-spinning" />
           <strong>Downloading update...</strong>
-          <small>{updateProgress}% complete</small>
+          <small>{updateProgress}% complete. Please don't close the application.</small>
         </div>}
         {updateStatus === "downloaded" && <div className="settings-update-downloaded">
           <CheckCircle2 size={32} />
           <strong>Update ready to install</strong>
-          <small>The update has been downloaded and is ready to be installed.</small>
-          <button className="settings-primary-button" type="button" onClick={installUpdate}><RefreshCw size={15} />Install and restart</button>
+          <small>The update has been downloaded. Click below to install and restart the application automatically.</small>
+          <button className="settings-primary-button settings-update-install-button" type="button" onClick={installUpdate}><RefreshCw size={15} />Install and restart application</button>
+          <p className="settings-update-warning"><CircleAlert size={14} />The application will close and restart automatically during installation.</p>
         </div>}
         {updateStatus === "not-available" && <div className="settings-update-not-available">
           <CheckCircle2 size={32} />
           <strong>You're up to date</strong>
-          <small>The application is already running the latest version.</small>
+          <small>The application is running the latest version.</small>
         </div>}
         {updateStatus === "error" && <div className="settings-update-error">
           <CircleAlert size={32} />
           <strong>Update error</strong>
-          <small>There was a problem checking for or downloading updates.</small>
+          <small>There was a problem checking for or downloading updates. Please try again later.</small>
         </div>}
       </div>
       <footer className="settings-form-footer">

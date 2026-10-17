@@ -168,6 +168,23 @@ body[data-theme="dark"] .settings-refresh, body[data-theme="dark"] .settings-sec
 body[data-theme="dark"] .settings-update-status { border-color: #394b3e; background: #1c2920; }
 body[data-theme="dark"] .settings-update-idle strong, body[data-theme="dark"] .settings-update-checking strong, body[data-theme="dark"] .settings-update-available strong, body[data-theme="dark"] .settings-update-downloading strong, body[data-theme="dark"] .settings-update-downloaded strong, body[data-theme="dark"] .settings-update-not-available strong, body[data-theme="dark"] .settings-update-error strong { color: #e0e9e1; }
 body[data-theme="dark"] .settings-update-idle small, body[data-theme="dark"] .settings-update-available small, body[data-theme="dark"] .settings-update-downloading small, body[data-theme="dark"] .settings-update-downloaded small, body[data-theme="dark"] .settings-update-not-available small, body[data-theme="dark"] .settings-update-error small { color: #a6b4a9; }
+.settings-update-notification { display: flex; align-items: center; padding: 12px 14px; margin-bottom: 15px; border: 1px solid #c9e4ca; border-radius: 4px; background: #f0f8f1; animation: slide-in .3s ease; }
+.settings-update-notification-content { display: flex; align-items: center; gap: 12px; flex: 1; }
+.settings-update-notification-content svg { color: #2d8650; flex: 0 0 auto; }
+.settings-update-notification-content > div { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.settings-update-notification-content strong { color: #2d6a3e; font-size: 10px; }
+.settings-update-notification-content small { color: #5e6e63; font-size: 9px; line-height: 1.4; }
+.settings-notification-button { min-height: 30px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid #286343; border-radius: 3px; background: #286343; color: #fff; font: 700 9px 'DM Sans', sans-serif; cursor: pointer; }
+.settings-notification-button:hover { border-color: #204f34; background: #204f34; }
+.settings-update-install-button { width: 100%; margin-top: 12px; }
+.settings-update-warning { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding: 8px 10px; border: 1px solid #f5e6dd; border-radius: 3px; background: #fef9f6; color: #8b5e4f; font-size: 9px; line-height: 1.4; }
+.settings-update-warning svg { flex: 0 0 auto; }
+@keyframes slide-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+body[data-theme="dark"] .settings-update-notification { border-color: #3d5a44; background: #26392b; }
+body[data-theme="dark"] .settings-update-notification-content svg { color: #4d9a64; }
+body[data-theme="dark"] .settings-update-notification-content strong { color: #b8e1bf; }
+body[data-theme="dark"] .settings-update-notification-content small { color: #a6b4a9; }
+body[data-theme="dark"] .settings-update-warning { border-color: #5c4a40; background: #3a3028; color: #d4b8a8; }
 body[data-theme="dark"] .settings-role-value strong, body[data-theme="dark"] .settings-maintenance-control strong { color: #dce6dd; }
 body[data-theme="dark"] .settings-maintenance-control small, body[data-theme="dark"] .settings-role-value small { color: #a4b2a7; }
 body[data-theme="dark"] .settings-maintenance.is-paused { background: #302924; }
