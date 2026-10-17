@@ -1,8 +1,8 @@
-version: 2.1.1
+version: 2.1.4
 files:
-  - url: Northstar Quality Operations Setup 2.1.1.exe
-    sha512: +6CDF2hh9QJ/eQumR3jJAwVmujgvTJpgjbUYzyUnCRWj6l6a/BvAovcwNnMn2qoccJZR7wThqtM7LJY2yHbmLQ==
-    size: 118158748
-path: Northstar Quality Operations Setup 2.1.1.exe
-sha512: +6CDF2hh9QJ/eQumR3jJAwVmujgvTJpgjbUYzyUnCRWj6l6a/BvAovcwNnMn2qoccJZR7wThqtM7LJY2yHbmLQ==
-releaseDate: '2026-10-17T11:01:49.816Z'
+  - url: Northstar Quality Operations Setup 2.1.4.exe
+    sha512: NgCFRVopY4nFm4UQ9MIB+KBJ+OFZhyNYvofEYCsJWlbWcbaApZG6qcSIDjHWWQfzw+mG9pXXGj0UwY6CrDNZ1A==
+    size: 118158796
+path: Northstar Quality Operations Setup 2.1.4.exe
+sha512: NgCFRVopY4nFm4UQ9MIB+KBJ+OFZhyNYvofEYCsJWlbWcbaApZG6qcSIDjHWWQfzw+mG9pXXGj0UwY6CrDNZ1A==
+releaseDate: '2026-10-17T12:05:09.004Z'
