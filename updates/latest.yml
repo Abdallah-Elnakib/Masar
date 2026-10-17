@@ -1,8 +1,8 @@
-version: 2.1.4
+version: 2.1.5
 files:
-  - url: Northstar Quality Operations Setup 2.1.4.exe
-    sha512: NgCFRVopY4nFm4UQ9MIB+KBJ+OFZhyNYvofEYCsJWlbWcbaApZG6qcSIDjHWWQfzw+mG9pXXGj0UwY6CrDNZ1A==
-    size: 118158796
-path: Northstar Quality Operations Setup 2.1.4.exe
-sha512: NgCFRVopY4nFm4UQ9MIB+KBJ+OFZhyNYvofEYCsJWlbWcbaApZG6qcSIDjHWWQfzw+mG9pXXGj0UwY6CrDNZ1A==
-releaseDate: '2026-10-17T12:05:09.004Z'
+  - url: https://github.com/Abdallah-Elnakib/Masar/releases/download/v2.1.5/Northstar.Quality.Operations.Setup.2.1.5.exe
+    sha512: EwxJUX7tmH/CHNifhvMPOjKGWnSIPVVc2uFOxyy1JOUnp3TlDrtfd2MC1EC1RP83aNp3eTelWVhxTyQBpfH+jw==
+    size: 118158841
+path: https://github.com/Abdallah-Elnakib/Masar/releases/download/v2.1.5/Northstar.Quality.Operations.Setup.2.1.5.exe
+sha512: EwxJUX7tmH/CHNifhvMPOjKGWnSIPVVc2uFOxyy1JOUnp3TlDrtfd2MC1EC1RP83aNp3eTelWVhxTyQBpfH+jw==
+releaseDate: '2026-10-17T12:13:29.791Z'

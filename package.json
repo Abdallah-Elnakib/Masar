@@ -1,6 +1,6 @@
 {
   "name": "Northstar-Quality-Operations",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "private": true,
   "description": "Quality operations desktop workspace",
   "main": "electron/main.cjs",
@@ -45,7 +45,7 @@
     ],
     "publish": {
       "provider": "generic",
-      "url": "https://raw.githubusercontent.com/Abdallah-Elnakib/Masar/main/updates"
+      "url": "https://github.com/Abdallah-Elnakib/Masar/releases/download"
     },
     "win": {
       "icon": "quality-assurance.ico",
