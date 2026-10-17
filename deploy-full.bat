@@ -7,10 +7,10 @@ echo.
 REM Ask for version bump
 set /p NEW_VERSION="Enter new version (e.g., 0.3.0): "
 
-REM Update version in package.json
+REM Update version in package.json using Node.js
 echo.
 echo Step 1: Updating version in package.json...
-powershell -Command "(Get-Content package.json) -replace '\"version\": \"[^\"]+\"', '\"version\": \"%NEW_VERSION%\"' | Set-Content package.json"
+node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); pkg.version = '%NEW_VERSION%'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
 
 REM Build the app
 echo.
