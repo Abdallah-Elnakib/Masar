@@ -1,0 +1,74 @@
+.awfar-kanban-page { display: flex; flex-direction: column; gap: 14px; min-height: 0; color: #23362a; }
+.awfar-kanban-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 19px; border: 1px solid #dce7de; border-radius: 6px; background: linear-gradient(115deg, #fff, #f4faf5); }
+.awfar-kanban-heading h2 { display: flex; align-items: center; gap: 9px; margin: 4px 0; color: #234831; font: 750 21px "Manrope", "Segoe UI", sans-serif; }
+.awfar-kanban-heading h2 svg { color: #398052; }
+.awfar-kanban-heading p { margin: 0; color: #65756a; font-size: 11px; }
+.awfar-kanban-eyebrow { color: #568065; font-size: 9px; font-weight: 800; letter-spacing: .9px; }
+.awfar-kanban-refresh { min-height: 37px; display: inline-flex; align-items: center; gap: 7px; padding: 0 12px; border: 1px solid #bfd4c3; border-radius: 5px; background: #fff; color: #315f40; font-size: 11px; font-weight: 700; cursor: pointer; }
+.awfar-kanban-export { min-height: 37px; display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; border: 1px solid #286343; border-radius: 5px; background: #286343; color: #fff; font-size: 11px; font-weight: 750; cursor: pointer; box-shadow: 0 2px 5px #173b281c; }
+.awfar-kanban-export:hover:not(:disabled) { background: #204f34; }
+.awfar-kanban-export:disabled { opacity: .55; cursor: wait; }
+.awfar-kanban-refresh:disabled { opacity: .6; cursor: wait; }
+.awfar-kanban-page .is-spinning { animation: settings-spin .8s linear infinite; }
+.awfar-kanban-export-message { display: flex; align-items: center; gap: 7px; padding: 9px 12px; border: 1px solid #c5dbc8; border-radius: 6px; background: #f0f8f1; color: #316341; font-size: 10px; }
+.awfar-kanban-stats { display: flex; align-items: center; gap: 11px; padding: 11px 13px; border: 1px solid #e0e8e1; border-radius: 6px; background: #fff; }
+.awfar-kanban-stats article { display: flex; align-items: center; gap: 7px; padding-right: 14px; border-right: 1px solid #e4eae4; color: #617166; font-size: 10px; }
+.awfar-kanban-stats article > svg, .awfar-kanban-stat-dot { color: #428057; }
+.awfar-kanban-stat-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.awfar-kanban-stats article strong { color: #294834; font-size: 14px; }
+.awfar-kanban-stats > small { margin-left: auto; color: #77857b; font-size: 9px; }
+.awfar-kanban-filters { display: flex; align-items: end; gap: 10px; padding: 11px 13px; border: 1px solid #e0e8e1; border-radius: 6px; background: #f9fbf9; }
+.awfar-kanban-search { display: flex; align-items: center; gap: 8px; width: min(440px, 60%); height: 36px; padding: 0 10px; border: 1px solid #d8e2d9; border-radius: 5px; background: #fff; color: #657469; }
+.awfar-kanban-search input { width: 100%; border: 0; outline: 0; background: transparent; color: #26382d; font-size: 11px; }
+.awfar-kanban-filters > label:not(.awfar-kanban-search) { display: flex; flex-direction: column; gap: 4px; color: #637267; font-size: 9px; font-weight: 700; }
+.awfar-kanban-filters select { min-width: 190px; height: 36px; padding: 0 9px; border: 1px solid #d8e2d9; border-radius: 5px; background: #fff; color: #304536; font-size: 11px; }
+.awfar-kanban-table-wrap { flex: 1; min-height: 300px; overflow: auto; border: 1px solid #dce5dd; border-radius: 6px; background: #fff; }
+.awfar-kanban-table { width: 100%; min-width: 1120px; border-collapse: separate; border-spacing: 0; font-size: 10px; }
+.awfar-kanban-table th { position: sticky; top: 0; z-index: 1; padding: 10px 9px; background: #1c4730; color: #f5faf6; text-align: left; white-space: nowrap; font-size: 9px; letter-spacing: .25px; }
+.awfar-kanban-table th.status-pending { color: #ffd37c; }
+.awfar-kanban-table th.status-processing { color: #8fcbff; }
+.awfar-kanban-table th.status-follow_up { color: #e0b1ff; }
+.awfar-kanban-table th.status-done { color: #8de3b6; }
+.awfar-kanban-table th.status-unassigned { color: #ffc0a4; }
+.awfar-kanban-table th.status-unread { color: #ff9aa4; }
+.awfar-kanban-table td { padding: 8px 9px; border-bottom: 1px solid #edf1ed; color: #405248; white-space: nowrap; }
+.awfar-kanban-table tbody tr:nth-child(even) { background: #f8faf8; }
+.awfar-kanban-table tbody tr.has-cases { background: #f1f8f2; }
+.awfar-kanban-table td:first-child { min-width: 165px; }
+.awfar-kanban-table td:first-child strong, .awfar-kanban-table td:first-child small { display: block; }
+.awfar-kanban-table td:first-child strong { color: #2e4636; font-size: 10px; }
+.awfar-kanban-table td:first-child small { margin-top: 3px; color: #748178; font-size: 9px; }
+.awfar-kanban-table td.awfar-kanban-campaign { min-width: 145px; font-weight: 650; }
+.awfar-kanban-table td.awfar-kanban-count { text-align: center; font-variant-numeric: tabular-nums; }
+.awfar-kanban-table td.awfar-kanban-count.is-unavailable { color: #a34d2f; font-weight: 800; }
+.awfar-kanban-table td.status-pending:not(:empty) { color: #94630e; }
+.awfar-kanban-table td.status-processing:not(:empty) { color: #17649b; }
+.awfar-kanban-table td.status-follow_up:not(:empty) { color: #7943a0; }
+.awfar-kanban-table td.status-done:not(:empty) { color: #207347; }
+.awfar-kanban-table td.status-unassigned:not(:empty) { color: #a34d2f; }
+.awfar-kanban-table td.status-unread:not(:empty) { color: #a42a37; }
+.awfar-kanban-table td.awfar-kanban-total { color: #214b32; font-weight: 800; text-align: center; }
+.awfar-kanban-error, .awfar-kanban-empty, .awfar-kanban-loading { padding: 17px; border: 1px solid #e4eae4; border-radius: 6px; background: #fff; color: #69786e; font-size: 11px; }
+.awfar-kanban-error { border-color: #edcfc8; background: #fff5f2; color: #923f32; }
+.awfar-kanban-warning { padding: 11px 13px; border: 1px solid #ead9af; border-radius: 6px; background: #fffaf0; color: #785c1d; font-size: 10px; line-height: 1.55; }
+.awfar-kanban-footer { color: #738076; font-size: 9px; }
+body[data-theme="dark"] .awfar-kanban-page { color: #e6eee8; }
+body[data-theme="dark"] .awfar-kanban-heading, body[data-theme="dark"] .awfar-kanban-stats, body[data-theme="dark"] .awfar-kanban-filters, body[data-theme="dark"] .awfar-kanban-table-wrap, body[data-theme="dark"] .awfar-kanban-error, body[data-theme="dark"] .awfar-kanban-empty, body[data-theme="dark"] .awfar-kanban-loading, body[data-theme="dark"] .awfar-kanban-export-message { border-color: #2e4134; background: #151d18; }
+body[data-theme="dark"] .awfar-kanban-warning { border-color: #67572f; background: #302b1d; color: #e5d09a; }
+body[data-theme="dark"] .awfar-kanban-heading h2, body[data-theme="dark"] .awfar-kanban-stats article strong, body[data-theme="dark"] .awfar-kanban-table td:first-child strong, body[data-theme="dark"] .awfar-kanban-table td.awfar-kanban-total { color: #e3f0e5; }
+body[data-theme="dark"] .awfar-kanban-heading p, body[data-theme="dark"] .awfar-kanban-stats article, body[data-theme="dark"] .awfar-kanban-stats > small, body[data-theme="dark"] .awfar-kanban-filters > label:not(.awfar-kanban-search), body[data-theme="dark"] .awfar-kanban-footer { color: #aab9ad; }
+body[data-theme="dark"] .awfar-kanban-refresh, body[data-theme="dark"] .awfar-kanban-search, body[data-theme="dark"] .awfar-kanban-filters select { border-color: #35483a; background: #1a261e; color: #dfe9e0; }
+body[data-theme="dark"] .awfar-kanban-export { border-color: #57916b; background: #286343; color: #fff; }
+body[data-theme="dark"] .awfar-kanban-search input { color: #e4eee5; }
+body[data-theme="dark"] .awfar-kanban-table th { background: #203f2d; }
+body[data-theme="dark"] .awfar-kanban-table td { border-color: #2b3930; color: #c8d5cb; }
+body[data-theme="dark"] .awfar-kanban-table tbody tr:nth-child(even) { background: #19221c; }
+body[data-theme="dark"] .awfar-kanban-table tbody tr.has-cases { background: #1c3022; }
+body[data-theme="dark"] .awfar-kanban-table td:first-child small { color: #a0afa4; }
+@media (max-width: 720px) {
+  .awfar-kanban-heading { align-items: flex-start; flex-direction: column; }
+  .awfar-kanban-stats { align-items: flex-start; flex-wrap: wrap; }
+  .awfar-kanban-stats > small { width: 100%; margin-left: 0; }
+  .awfar-kanban-search { width: 100%; }
+  .awfar-kanban-filters { align-items: stretch; flex-direction: column; }
+}

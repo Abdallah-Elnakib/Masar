@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "updates/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/updates/(.*)",
+      "dest": "/updates/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=3600, must-revalidate"
+      }
+    }
+  ]
+}
