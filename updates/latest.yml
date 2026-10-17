@@ -1,8 +1,8 @@
-version: 2.1.7
+version: 2.1.8
 files:
-  - url: https://github.com/Abdallah-Elnakib/Masar/releases/download/v2.1.7/Northstar.Quality.Operations.Setup.2.1.7.exe
-    sha512: 1w6Nntq7NZscN0Jr6dJeuP/tBgu9Z+6lvfpfV31KeCxlBJSYXjQy4//PSlRc+KuLVU7hgmzYZYMnuXCcr3IZtQ==
-    size: 118158863
-path: https://github.com/Abdallah-Elnakib/Masar/releases/download/v2.1.7/Northstar.Quality.Operations.Setup.2.1.7.exe
-sha512: 1w6Nntq7NZscN0Jr6dJeuP/tBgu9Z+6lvfpfV31KeCxlBJSYXjQy4//PSlRc+KuLVU7hgmzYZYMnuXCcr3IZtQ==
-releaseDate: '2026-10-17T12:37:29.344Z'
+  - url: https://github.com/Abdallah-Elnakib/Masar/releases/download/v2.1.8/Northstar.Quality.Operations.Setup.2.1.8.exe
+    sha512: +mCu0EX4sEyxe6VZVpDvJI1DjkrpQMB/+fSL56nJekzXjlc+y0BmRWLCEnRIl9PHsDNaP5XmgBZT5ponaRVSFA==
+    size: 118158772
+path: https://github.com/Abdallah-Elnakib/Masar/releases/download/v2.1.8/Northstar.Quality.Operations.Setup.2.1.8.exe
+sha512: +mCu0EX4sEyxe6VZVpDvJI1DjkrpQMB/+fSL56nJekzXjlc+y0BmRWLCEnRIl9PHsDNaP5XmgBZT5ponaRVSFA==
+releaseDate: '2026-10-17T12:48:18.338Z'
