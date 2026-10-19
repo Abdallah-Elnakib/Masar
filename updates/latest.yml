@@ -1,8 +1,8 @@
-version: 2.4.3
+version: 2.4.4
 files:
-  - url: Northstar-Quality-Operations-Setup-2.4.3.exe
-    sha512: U+IX7oDPSG0wB6n0CZz+qTh8A4acNUHwFFZxpZYh5o2Px39U4F1rPD2CLUhKOIseho8rww7S8gNVjHQHT635qA==
-    size: 118018529
-path: Northstar-Quality-Operations-Setup-2.4.3.exe
-sha512: U+IX7oDPSG0wB6n0CZz+qTh8A4acNUHwFFZxpZYh5o2Px39U4F1rPD2CLUhKOIseho8rww7S8gNVjHQHT635qA==
-releaseDate: '2026-10-19T06:53:28.604Z'
+  - url: Northstar-Quality-Operations-Setup-2.4.4.exe
+    sha512: 9s/1RqPUM24TdQbbrgw7xjAvQmvi1Xw9R57ThHbVQ5Yq/3SxdJ8m2ZdcUFvwVDPr7MDr1tjyjimRv8lBj1BxTw==
+    size: 118018464
+path: Northstar-Quality-Operations-Setup-2.4.4.exe
+sha512: 9s/1RqPUM24TdQbbrgw7xjAvQmvi1Xw9R57ThHbVQ5Yq/3SxdJ8m2ZdcUFvwVDPr7MDr1tjyjimRv8lBj1BxTw==
+releaseDate: '2026-10-19T07:00:52.878Z'
