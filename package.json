@@ -44,8 +44,9 @@
       ".env.example"
     ],
     "publish": {
-      "provider": "generic",
-      "url": "https://github.com/Abdallah-Elnakib/Masar/releases/download"
+      "provider": "github",
+      "owner": "Abdallah-Elnakib",
+      "repo": "Masar"
     },
     "win": {
       "icon": "quality-assurance.ico",
@@ -54,6 +55,7 @@
       ]
     },
     "nsis": {
+      "artifactName": "${productName} Setup ${version}.${ext}",
       "installerIcon": "quality-assurance.ico",
       "uninstallerIcon": "quality-assurance.ico",
       "installerHeaderIcon": "quality-assurance.ico",
