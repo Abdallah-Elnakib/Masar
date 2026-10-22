@@ -33,27 +33,21 @@
 
 #### الخطوة 2: تحديث إعدادات التحديثات
 
-في ملف `package.json`، قم بتحديث رابط خادم التحديثات:
+في ملف `package.json`، قم بتحديث إعدادات GitHub releases:
 
 ```json
 {
   "build": {
     "publish": {
-      "provider": "generic",
-      "url": "https://your-server.com/updates"
+      "provider": "github",
+      "owner": "your-username",
+      "repo": "your-repo"
     }
   }
 }
 ```
 
-في ملف `electron/main.cjs`، قم بتحديث نفس الرابط:
-
-```javascript
-autoUpdater.setFeedURL({
-  provider: "generic",
-  url: "https://your-server.com/updates",
-});
-```
+**ملاحظة**: لا حاجة لتغيير إعدادات في `electron/main.cjs` - electron-builder يقوم تلقائياً بضبط إعدادات التحديثات بناءً على التكوين في `package.json`.
 
 #### الخطوة 3: بناء التطبيق ونشره
 

@@ -1,74 +1,349 @@
-.awfar-kanban-page { display: flex; flex-direction: column; gap: 14px; min-height: 0; color: #23362a; }
-.awfar-kanban-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 19px; border: 1px solid #dce7de; border-radius: 6px; background: linear-gradient(115deg, #fff, #f4faf5); }
-.awfar-kanban-heading h2 { display: flex; align-items: center; gap: 9px; margin: 4px 0; color: #234831; font: 750 21px "Manrope", "Segoe UI", sans-serif; }
-.awfar-kanban-heading h2 svg { color: #398052; }
-.awfar-kanban-heading p { margin: 0; color: #65756a; font-size: 11px; }
-.awfar-kanban-eyebrow { color: #568065; font-size: 9px; font-weight: 800; letter-spacing: .9px; }
-.awfar-kanban-refresh { min-height: 37px; display: inline-flex; align-items: center; gap: 7px; padding: 0 12px; border: 1px solid #bfd4c3; border-radius: 5px; background: #fff; color: #315f40; font-size: 11px; font-weight: 700; cursor: pointer; }
-.awfar-kanban-export { min-height: 37px; display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; border: 1px solid #286343; border-radius: 5px; background: #286343; color: #fff; font-size: 11px; font-weight: 750; cursor: pointer; box-shadow: 0 2px 5px #173b281c; }
-.awfar-kanban-export:hover:not(:disabled) { background: #204f34; }
-.awfar-kanban-export:disabled { opacity: .55; cursor: wait; }
-.awfar-kanban-refresh:disabled { opacity: .6; cursor: wait; }
-.awfar-kanban-page .is-spinning { animation: settings-spin .8s linear infinite; }
-.awfar-kanban-export-message { display: flex; align-items: center; gap: 7px; padding: 9px 12px; border: 1px solid #c5dbc8; border-radius: 6px; background: #f0f8f1; color: #316341; font-size: 10px; }
-.awfar-kanban-stats { display: flex; align-items: center; gap: 11px; padding: 11px 13px; border: 1px solid #e0e8e1; border-radius: 6px; background: #fff; }
-.awfar-kanban-stats article { display: flex; align-items: center; gap: 7px; padding-right: 14px; border-right: 1px solid #e4eae4; color: #617166; font-size: 10px; }
-.awfar-kanban-stats article > svg, .awfar-kanban-stat-dot { color: #428057; }
-.awfar-kanban-stat-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-.awfar-kanban-stats article strong { color: #294834; font-size: 14px; }
-.awfar-kanban-stats > small { margin-left: auto; color: #77857b; font-size: 9px; }
-.awfar-kanban-filters { display: flex; align-items: end; gap: 10px; padding: 11px 13px; border: 1px solid #e0e8e1; border-radius: 6px; background: #f9fbf9; }
-.awfar-kanban-search { display: flex; align-items: center; gap: 8px; width: min(440px, 60%); height: 36px; padding: 0 10px; border: 1px solid #d8e2d9; border-radius: 5px; background: #fff; color: #657469; }
-.awfar-kanban-search input { width: 100%; border: 0; outline: 0; background: transparent; color: #26382d; font-size: 11px; }
-.awfar-kanban-filters > label:not(.awfar-kanban-search) { display: flex; flex-direction: column; gap: 4px; color: #637267; font-size: 9px; font-weight: 700; }
-.awfar-kanban-filters select { min-width: 190px; height: 36px; padding: 0 9px; border: 1px solid #d8e2d9; border-radius: 5px; background: #fff; color: #304536; font-size: 11px; }
-.awfar-kanban-table-wrap { flex: 1; min-height: 300px; overflow: auto; border: 1px solid #dce5dd; border-radius: 6px; background: #fff; }
-.awfar-kanban-table { width: 100%; min-width: 1120px; border-collapse: separate; border-spacing: 0; font-size: 10px; }
-.awfar-kanban-table th { position: sticky; top: 0; z-index: 1; padding: 10px 9px; background: #1c4730; color: #f5faf6; text-align: left; white-space: nowrap; font-size: 9px; letter-spacing: .25px; }
-.awfar-kanban-table th.status-pending { color: #ffd37c; }
-.awfar-kanban-table th.status-processing { color: #8fcbff; }
-.awfar-kanban-table th.status-follow_up { color: #e0b1ff; }
-.awfar-kanban-table th.status-done { color: #8de3b6; }
-.awfar-kanban-table th.status-unassigned { color: #ffc0a4; }
-.awfar-kanban-table th.status-unread { color: #ff9aa4; }
-.awfar-kanban-table td { padding: 8px 9px; border-bottom: 1px solid #edf1ed; color: #405248; white-space: nowrap; }
-.awfar-kanban-table tbody tr:nth-child(even) { background: #f8faf8; }
-.awfar-kanban-table tbody tr.has-cases { background: #f1f8f2; }
-.awfar-kanban-table td:first-child { min-width: 165px; }
+.awfar-kanban-page { display: flex; flex-direction: column; gap: 16px; min-height: 0; color: #1a2e23; }
+
+/* Header Section */
+.awfar-kanban-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; border: 1px solid #c8d4c8; border-radius: 8px; background: linear-gradient(135deg, #ffffff 0%, #f4f9f5 100%); box-shadow: 0 2px 8px rgba(40, 99, 67, 0.08); }
+.awfar-kanban-heading h2 { display: flex; align-items: center; gap: 10px; margin: 6px 0; color: #1d3d28; font: 700 24px "Manrope", "Segoe UI", sans-serif; letter-spacing: -0.3px; }
+.awfar-kanban-heading h2 svg { color: #2d7a4a; }
+.awfar-kanban-heading p { margin: 0; color: #5a6a5f; font-size: 13px; line-height: 1.5; }
+.awfar-kanban-eyebrow { color: #4a7c5d; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+
+/* Action Buttons */
+.awfar-kanban-refresh { min-height: 42px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border: 1px solid #b8d4c0; border-radius: 6px; background: #ffffff; color: #2a5a3d; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+.awfar-kanban-refresh:hover:not(:disabled) { border-color: #286343; background: #f4f9f4; }
+.awfar-kanban-export { min-height: 42px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border: 1px solid #2a6b48; border-radius: 6px; background: #2a6b48; color: #ffffff; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(42, 107, 72, 0.2); transition: all 0.2s ease; }
+.awfar-kanban-export:hover:not(:disabled) { background: #22563a; border-color: #22563a; transform: translateY(-1px); }
+.awfar-kanban-export:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.awfar-kanban-refresh:disabled { opacity: 0.6; cursor: not-allowed; }
+.awfar-kanban-page .is-spinning { animation: settings-spin 0.8s linear infinite; }
+
+/* Messages */
+.awfar-kanban-export-message { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border: 1px solid #b8d4c0; border-radius: 6px; background: #f0f8f1; color: #2a5a3d; font-size: 12px; font-weight: 500; }
+.awfar-kanban-error, .awfar-kanban-empty, .awfar-kanban-loading { padding: 20px 24px; border: 1px solid #e0e8e4; border-radius: 8px; background: #ffffff; color: #5a6a5f; font-size: 13px; text-align: center; }
+.awfar-kanban-error { border-color: #e8c4b8; background: #fef5f2; color: #b4422a; }
+.awfar-kanban-warning { padding: 14px 18px; border: 1px solid #e8d4a8; border-radius: 8px; background: #fefaf4; color: #8a6b28; font-size: 12px; line-height: 1.6; }
+
+/* Stats Section */
+.awfar-kanban-stats { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border: 1px solid #d0dac4; border-radius: 8px; background: #ffffff; box-shadow: 0 1px 4px rgba(40, 99, 67, 0.06); }
+.awfar-kanban-stats article { display: flex; align-items: center; gap: 10px; padding-right: 20px; border-right: 1px solid #e0e8e4; color: #5a6a5f; font-size: 12px; font-weight: 500; }
+.awfar-kanban-stats article > svg, .awfar-kanban-stat-dot { color: #2d7a4a; }
+.awfar-kanban-stat-dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+.awfar-kanban-stats article strong { color: #1d3d28; font-size: 18px; font-weight: 700; }
+.awfar-kanban-stats > small { margin-left: auto; color: #7a8a7f; font-size: 11px; }
+.awfar-kanban-live-indicator { margin-left: auto; display: flex; align-items: center; gap: 8px; color: #2a6b48; font-size: 11px; font-weight: 600; }
+.awfar-kanban-live-indicator .is-pulsing { animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Live Value Indicators */
+.awfar-kanban-stats article strong.is-live, .awfar-kanban-total-value.is-live, .awfar-kanban-campaign-total-value.is-live { position: relative; padding-right: 10px; }
+.awfar-kanban-stats article strong.is-live::after, .awfar-kanban-total-value.is-live::after, .awfar-kanban-campaign-total-value.is-live::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2a6b48;
+  animation: live-glow 2s ease-in-out infinite;
+  z-index: 1;
+}
+@keyframes live-glow {
+  0%, 100% { opacity: 0.6; transform: translateY(-50%) scale(1); }
+  50% { opacity: 1; transform: translateY(-50%) scale(1.2); }
+}
+@keyframes live-glow-simple {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Filters Section */
+.awfar-kanban-filters { display: flex; align-items: end; gap: 12px; padding: 16px 20px; border: 1px solid #d0dac4; border-radius: 8px; background: #fafcf9; flex-wrap: wrap; }
+.awfar-kanban-search { display: flex; align-items: center; gap: 10px; width: min(400px, 60%); height: 42px; padding: 0 14px; border: 1px solid #c8d4c8; border-radius: 6px; background: #ffffff; color: #5a6a5f; transition: border-color 0.2s ease; flex: 1; min-width: 200px; }
+.awfar-kanban-search:focus-within { border-color: #2a6b48; box-shadow: 0 0 0 3px rgba(42, 107, 72, 0.1); }
+.awfar-kanban-search input { width: 100%; border: 0; outline: 0; background: transparent; color: #1a2e23; font-size: 13px; }
+.awfar-kanban-filters > label:not(.awfar-kanban-search) { display: flex; flex-direction: column; gap: 6px; color: #5a6a5f; font-size: 11px; font-weight: 600; min-width: 160px; }
+.awfar-kanban-filters select { min-width: 160px; height: 42px; padding: 0 12px; border: 1px solid #c8d4c8; border-radius: 6px; background: #ffffff; color: #1a2e23; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+/* Table Container */
+.awfar-kanban-table-wrap { flex: 1; min-height: 400px; overflow: auto; border: 1px solid #c8d4c8; border-radius: 8px; background: #ffffff; box-shadow: 0 2px 8px rgba(40, 99, 67, 0.06); }
+
+/* Table Design */
+.awfar-kanban-table { width: 100%; min-width: 1200px; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.awfar-kanban-table thead { background: #1a4d32; }
+.awfar-kanban-table th { position: sticky; top: 0; z-index: 10; padding: 14px 12px; background: #1a4d32; color: #ffffff; text-align: left; white-space: nowrap; font-size: 12px; font-weight: 600; letter-spacing: 0.3px; border-bottom: 2px solid #143a26; }
+.awfar-kanban-table th:first-child { border-top-left-radius: 8px; }
+.awfar-kanban-table th:last-child { border-top-right-radius: 8px; }
+
+/* Status Column Colors */
+.awfar-kanban-table th.status-pending { color: #ffd678; background: #2a4a35; }
+.awfar-kanban-table th.status-processing { color: #7ec4ff; background: #264a58; }
+.awfar-kanban-table th.status-follow_up { color: #d4a0ff; background: #4a2a58; }
+.awfar-kanban-table th.status-done { color: #78e0c0; background: #1a4a30; }
+.awfar-kanban-table th.status-unassigned { color: #ffbd9e; background: #4a2a20; }
+.awfar-kanban-table th.status-unread { color: #ff9fa4; background: #4a1a26; }
+
+.awfar-kanban-table td { padding: 12px 12px; border-bottom: 1px solid #e0e8e4; color: #2a3a30; white-space: nowrap; font-size: 13px; }
+.awfar-kanban-table tbody tr { transition: background-color 0.15s ease; }
+.awfar-kanban-table tbody tr:hover { background: #f4f9f4; }
+.awfar-kanban-table tbody tr:nth-child(even) { background: #fafcf9; }
+.awfar-kanban-table tbody tr:nth-child(even):hover { background: #f0f6f0; }
+.awfar-kanban-table tbody tr.has-cases { background: #e8f4eb; }
+.awfar-kanban-table tbody tr.has-cases:hover { background: #dff0e4; }
+
+.awfar-kanban-table td:first-child { min-width: 180px; font-weight: 500; }
 .awfar-kanban-table td:first-child strong, .awfar-kanban-table td:first-child small { display: block; }
-.awfar-kanban-table td:first-child strong { color: #2e4636; font-size: 10px; }
-.awfar-kanban-table td:first-child small { margin-top: 3px; color: #748178; font-size: 9px; }
-.awfar-kanban-table td.awfar-kanban-campaign { min-width: 145px; font-weight: 650; }
-.awfar-kanban-table td.awfar-kanban-count { text-align: center; font-variant-numeric: tabular-nums; }
-.awfar-kanban-table td.awfar-kanban-count.is-unavailable { color: #a34d2f; font-weight: 800; }
-.awfar-kanban-table td.status-pending:not(:empty) { color: #94630e; }
-.awfar-kanban-table td.status-processing:not(:empty) { color: #17649b; }
-.awfar-kanban-table td.status-follow_up:not(:empty) { color: #7943a0; }
-.awfar-kanban-table td.status-done:not(:empty) { color: #207347; }
-.awfar-kanban-table td.status-unassigned:not(:empty) { color: #a34d2f; }
-.awfar-kanban-table td.status-unread:not(:empty) { color: #a42a37; }
-.awfar-kanban-table td.awfar-kanban-total { color: #214b32; font-weight: 800; text-align: center; }
-.awfar-kanban-error, .awfar-kanban-empty, .awfar-kanban-loading { padding: 17px; border: 1px solid #e4eae4; border-radius: 6px; background: #fff; color: #69786e; font-size: 11px; }
-.awfar-kanban-error { border-color: #edcfc8; background: #fff5f2; color: #923f32; }
-.awfar-kanban-warning { padding: 11px 13px; border: 1px solid #ead9af; border-radius: 6px; background: #fffaf0; color: #785c1d; font-size: 10px; line-height: 1.55; }
-.awfar-kanban-footer { color: #738076; font-size: 9px; }
-body[data-theme="dark"] .awfar-kanban-page { color: #e6eee8; }
-body[data-theme="dark"] .awfar-kanban-heading, body[data-theme="dark"] .awfar-kanban-stats, body[data-theme="dark"] .awfar-kanban-filters, body[data-theme="dark"] .awfar-kanban-table-wrap, body[data-theme="dark"] .awfar-kanban-error, body[data-theme="dark"] .awfar-kanban-empty, body[data-theme="dark"] .awfar-kanban-loading, body[data-theme="dark"] .awfar-kanban-export-message { border-color: #2e4134; background: #151d18; }
-body[data-theme="dark"] .awfar-kanban-warning { border-color: #67572f; background: #302b1d; color: #e5d09a; }
-body[data-theme="dark"] .awfar-kanban-heading h2, body[data-theme="dark"] .awfar-kanban-stats article strong, body[data-theme="dark"] .awfar-kanban-table td:first-child strong, body[data-theme="dark"] .awfar-kanban-table td.awfar-kanban-total { color: #e3f0e5; }
-body[data-theme="dark"] .awfar-kanban-heading p, body[data-theme="dark"] .awfar-kanban-stats article, body[data-theme="dark"] .awfar-kanban-stats > small, body[data-theme="dark"] .awfar-kanban-filters > label:not(.awfar-kanban-search), body[data-theme="dark"] .awfar-kanban-footer { color: #aab9ad; }
-body[data-theme="dark"] .awfar-kanban-refresh, body[data-theme="dark"] .awfar-kanban-search, body[data-theme="dark"] .awfar-kanban-filters select { border-color: #35483a; background: #1a261e; color: #dfe9e0; }
-body[data-theme="dark"] .awfar-kanban-export { border-color: #57916b; background: #286343; color: #fff; }
-body[data-theme="dark"] .awfar-kanban-search input { color: #e4eee5; }
-body[data-theme="dark"] .awfar-kanban-table th { background: #203f2d; }
-body[data-theme="dark"] .awfar-kanban-table td { border-color: #2b3930; color: #c8d5cb; }
-body[data-theme="dark"] .awfar-kanban-table tbody tr:nth-child(even) { background: #19221c; }
-body[data-theme="dark"] .awfar-kanban-table tbody tr.has-cases { background: #1c3022; }
-body[data-theme="dark"] .awfar-kanban-table td:first-child small { color: #a0afa4; }
+.awfar-kanban-table td:first-child strong { color: #1a3d28; font-size: 13px; font-weight: 600; }
+.awfar-kanban-table td:first-child small { margin-top: 4px; color: #7a8a7f; font-size: 11px; }
+.awfar-kanban-table td:nth-child(2) { min-width: 140px; font-weight: 500; color: #3a5a40; }
+.awfar-kanban-table td:nth-child(3) { min-width: 150px; color: #5a6a5f; }
+.awfar-kanban-table td.awfar-kanban-campaign { min-width: 160px; font-weight: 600; color: #1a3d28; }
+.awfar-kanban-table td.awfar-kanban-count { position: relative; text-align: center; font-variant-numeric: tabular-nums; font-weight: 500; font-size: 14px; padding-right: 14px; }
+.awfar-kanban-table td.awfar-kanban-count.is-unavailable { color: #b4422a; font-weight: 700; font-size: 12px; }
+.awfar-kanban-table td.awfar-kanban-count.is-live::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #2a6b48;
+  animation: live-glow-simple 2s ease-in-out infinite;
+  z-index: 1;
+}
+.awfar-kanban-table td.awfar-kanban-total { position: relative; padding-right: 14px; }
+.awfar-kanban-table td.awfar-kanban-total.is-live::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #2a6b48;
+  animation: live-glow-simple 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+/* Status Cell Colors */
+.awfar-kanban-table td.status-pending:not(:empty) { color: #9a5810; background: #fff8e8; font-weight: 600; }
+.awfar-kanban-table td.status-processing:not(:empty) { color: #1a5a9a; background: #e8f0ff; font-weight: 600; }
+.awfar-kanban-table td.status-follow_up:not(:empty) { color: #6a309a; background: #f0e8ff; font-weight: 600; }
+.awfar-kanban-table td.status-done:not(:empty) { color: #1a6a3a; background: #e8f8ec; font-weight: 600; }
+.awfar-kanban-table td.status-unassigned:not(:empty) { color: #9a4a20; background: #fff0e0; font-weight: 600; }
+.awfar-kanban-table td.status-unread:not(:empty) { color: #9a1a30; background: #ffe8ec; font-weight: 600; }
+
+.awfar-kanban-table td.awfar-kanban-total { color: #1a4d32; font-weight: 700; text-align: center; font-size: 15px; background: #e8f4eb; }
+.awfar-kanban-footer { display: flex; align-items: center; gap: 8px; color: #7a8a7f; font-size: 11px; }
+.awfar-kanban-footer .is-pulsing { animation: pulse 2s ease-in-out infinite; }
+
+/* Dark Mode - Completely Redesigned */
+body[data-theme="dark"] .awfar-kanban-page { color: #e8f0eb; }
+
+body[data-theme="dark"] .awfar-kanban-heading { border-color: #3a4a3e; background: linear-gradient(135deg, #1a2620 0%, #141e1a 100%); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
+body[data-theme="dark"] .awfar-kanban-heading h2 { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-heading h2 svg { color: #5ac880; }
+body[data-theme="dark"] .awfar-kanban-heading p { color: #a0b0a8; }
+body[data-theme="dark"] .awfar-kanban-eyebrow { color: #7ac090; }
+
+body[data-theme="dark"] .awfar-kanban-refresh { border-color: #4a5a4e; background: #1a2620; color: #c0d0c8; }
+body[data-theme="dark"] .awfar-kanban-refresh:hover:not(:disabled) { border-color: #5ac880; background: #243028; }
+body[data-theme="dark"] .awfar-kanban-export { border-color: #5ac880; background: #2a7a4a; color: #ffffff; }
+body[data-theme="dark"] .awfar-kanban-export:hover:not(:disabled) { background: #3a8a5a; }
+
+body[data-theme="dark"] .awfar-kanban-export-message { border-color: #4a5a4e; background: #1a2e24; color: #7ac890; }
+body[data-theme="dark"] .awfar-kanban-error, body[data-theme="dark"] .awfar-kanban-empty, body[data-theme="dark"] .awfar-kanban-loading { border-color: #4a3a2e; background: #1a1a18; color: #a0b0a8; }
+body[data-theme="dark"] .awfar-kanban-error { border-color: #5a3a2e; background: #2a1a18; color: #ff7a5a; }
+body[data-theme="dark"] .awfar-kanban-warning { border-color: #5a4a2e; background: #2a2a1a; color: #e8c870; }
+
+body[data-theme="dark"] .awfar-kanban-stats { border-color: #3a4a3e; background: #1a2620; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3); }
+body[data-theme="dark"] .awfar-kanban-stats article { color: #a0b0a8; border-right-color: #3a4a3e; }
+body[data-theme="dark"] .awfar-kanban-stats article > svg, body[data-theme="dark"] .awfar-kanban-stat-dot { color: #5ac880; }
+body[data-theme="dark"] .awfar-kanban-stats article strong { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-stats > small { color: #809088; }
+body[data-theme="dark"] .awfar-kanban-live-indicator { color: #7ac890; }
+body[data-theme="dark"] .awfar-kanban-stats article strong.is-live::after, body[data-theme="dark"] .awfar-kanban-total-value.is-live::after, body[data-theme="dark"] .awfar-kanban-campaign-total-value.is-live::after { background: #5ac880; }
+
+body[data-theme="dark"] .awfar-kanban-filters { border-color: #3a4a3e; background: #141e1a; }
+body[data-theme="dark"] .awfar-kanban-search { border-color: #3a4a3e; background: #1a2620; color: #a0b0a8; }
+body[data-theme="dark"] .awfar-kanban-search:focus-within { border-color: #5ac880; box-shadow: 0 0 0 3px rgba(90, 200, 128, 0.15); }
+body[data-theme="dark"] .awfar-kanban-search input { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-filters > label:not(.awfar-kanban-search) { color: #a0b0a8; }
+body[data-theme="dark"] .awfar-kanban-filters select { border-color: #3a4a3e; background: #1a2620; color: #e8f4eb; }
+
+body[data-theme="dark"] .awfar-kanban-table-wrap { border-color: #3a4a3e; background: #1a2620; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
+body[data-theme="dark"] .awfar-kanban-table th { background: #1a4a30; border-bottom-color: #0a2a18; }
+body[data-theme="dark"] .awfar-kanban-table th.status-pending { background: #2a3a28; color: #ffca60; }
+body[data-theme="dark"] .awfar-kanban-table th.status-processing { background: #1a3a48; color: #60b0e8; }
+body[data-theme="dark"] .awfar-kanban-table th.status-follow_up { background: #3a1a48; color: #c880e8; }
+body[data-theme="dark"] .awfar-kanban-table th.status-done { background: #0a3a20; color: #60d0a0; }
+body[data-theme="dark"] .awfar-kanban-table th.status-unassigned { background: #3a1a18; color: #ffaa80; }
+body[data-theme="dark"] .awfar-kanban-table th.status-unread { background: #3a0a18; color: #ff8090; }
+
+body[data-theme="dark"] .awfar-kanban-table td { border-color: #2a3a2e; color: #c0d0c8; }
+body[data-theme="dark"] .awfar-kanban-table tbody tr:nth-child(even) { background: #141e1a; }
+body[data-theme="dark"] .awfar-kanban-table tbody tr:hover { background: #1a2e24; }
+body[data-theme="dark"] .awfar-kanban-table tbody tr.has-cases { background: #1a3024; }
+body[data-theme="dark"] .awfar-kanban-table tbody tr.has-cases:hover { background: #243a2e; }
+
+body[data-theme="dark"] .awfar-kanban-table td:first-child strong { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-table td:first-child small { color: #809088; }
+body[data-theme="dark"] .awfar-kanban-table td:nth-child(2) { color: #b0c0b8; }
+body[data-theme="dark"] .awfar-kanban-table td:nth-child(3) { color: #90a098; }
+body[data-theme="dark"] .awfar-kanban-table td.awfar-kanban-campaign { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-table td.awfar-kanban-count.is-unavailable { color: #ff7a5a; }
+
+body[data-theme="dark"] .awfar-kanban-table td.status-pending:not(:empty) { color: #ffa040; background: #2a2a18; }
+body[data-theme="dark"] .awfar-kanban-table td.status-processing:not(:empty) { color: #4090d0; background: #182030; }
+body[data-theme="dark"] .awfar-kanban-table td.status-follow_up:not(:empty) { color: #a060d0; background: #201830; }
+body[data-theme="dark"] .awfar-kanban-table td.status-done:not(:empty) { color: #40a060; background: #182018; }
+body[data-theme="dark"] .awfar-kanban-table td.status-unassigned:not(:empty) { color: #d08040; background: #2a1810; }
+body[data-theme="dark"] .awfar-kanban-table td.status-unread:not(:empty) { color: #d04050; background: #2a1018; }
+
+body[data-theme="dark"] .awfar-kanban-table td.awfar-kanban-total { color: #60c090; background: #1a3024; }
+body[data-theme="dark"] .awfar-kanban-footer { color: #809088; }
+
+/* Live indicators for table cells - dark mode */
+body[data-theme="dark"] .awfar-kanban-table td.awfar-kanban-count.is-live::after { background: #5ac880; }
+body[data-theme="dark"] .awfar-kanban-table td.awfar-kanban-total.is-live::after { background: #5ac880; }
+
+/* Totals Section */
+.awfar-kanban-totals { padding: 20px 24px; border: 1px solid #c8d4c8; border-radius: 8px; background: linear-gradient(135deg, #ffffff 0%, #f4f9f5 100%); box-shadow: 0 2px 8px rgba(40, 99, 67, 0.08); }
+.awfar-kanban-totals-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #d0dac4; }
+.awfar-kanban-totals-header h3 { margin: 6px 0; color: #1d3d28; font: 700 20px "Manrope", "Segoe UI", sans-serif; }
+.awfar-kanban-totals-header p { margin: 0; color: #5a6a5f; font-size: 13px; }
+.awfar-kanban-totals-live { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid #b8d4c0; border-radius: 20px; background: #e8f4eb; color: #2a6b48; font-size: 12px; font-weight: 600; }
+.awfar-kanban-totals-live .is-pulsing { animation: pulse 2s ease-in-out infinite; }
+.awfar-kanban-totals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.awfar-kanban-total-card { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #d0dac4; border-radius: 8px; background: #ffffff; transition: all 0.2s ease; }
+.awfar-kanban-total-card:hover { border-color: #2a6b48; box-shadow: 0 2px 8px rgba(42, 107, 72, 0.12); }
+.awfar-kanban-total-card.grand-total { border-color: #2a6b48; background: linear-gradient(135deg, #e8f4eb 0%, #f0f9f4 100%); }
+.awfar-kanban-total-icon { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 8px; background: #2a6b48; color: #ffffff; }
+.awfar-kanban-total-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.awfar-kanban-total-label { color: #5a6a5f; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.awfar-kanban-total-value { color: #1d3d28; font-size: 24px; font-weight: 700; line-height: 1; }
+.awfar-kanban-total-sub { color: #7a8a7f; font-size: 10px; }
+
+/* Totals Dark Mode */
+body[data-theme="dark"] .awfar-kanban-totals { border-color: #3a4a3e; background: linear-gradient(135deg, #1a2620 0%, #141e1a 100%); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
+body[data-theme="dark"] .awfar-kanban-totals-header { border-bottom-color: #3a4a3e; }
+body[data-theme="dark"] .awfar-kanban-totals-header h3 { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-totals-header p { color: #a0b0a8; }
+body[data-theme="dark"] .awfar-kanban-totals-live { border-color: #4a5a4e; background: #1a3024; color: #7ac890; }
+body[data-theme="dark"] .awfar-kanban-total-card { border-color: #3a4a3e; background: #1a2620; }
+body[data-theme="dark"] .awfar-kanban-total-card:hover { border-color: #5ac880; }
+body[data-theme="dark"] .awfar-kanban-total-card.grand-total { border-color: #5ac880; background: linear-gradient(135deg, #1a3024 0%, #141e1a 100%); }
+body[data-theme="dark"] .awfar-kanban-total-icon { background: #2a7a4a; }
+body[data-theme="dark"] .awfar-kanban-total-label { color: #a0b0a8; }
+body[data-theme="dark"] .awfar-kanban-total-value { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-total-sub { color: #809088; }
+
+/* Campaign Breakdown Section */
+.awfar-kanban-campaigns-grid { padding: 20px 24px; border: 1px solid #c8d4c8; border-radius: 8px; background: linear-gradient(135deg, #ffffff 0%, #f4f9f5 100%); box-shadow: 0 2px 8px rgba(40, 99, 67, 0.08); }
+.awfar-kanban-campaigns-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #d0dac4; }
+.awfar-kanban-campaigns-header h3 { margin: 6px 0; color: #1d3d28; font: 700 20px "Manrope", "Segoe UI", sans-serif; }
+.awfar-kanban-campaigns-header p { margin: 0; color: #5a6a5f; font-size: 13px; }
+.awfar-kanban-campaigns-filters { display: flex; align-items: end; gap: 12px; margin-bottom: 20px; padding: 16px; border: 1px solid #d0dac4; border-radius: 8px; background: #fafcf9; flex-wrap: wrap; }
+.awfar-kanban-campaign-search { display: flex; align-items: center; gap: 10px; width: min(300px, 50%); height: 42px; padding: 0 14px; border: 1px solid #c8d4c8; border-radius: 6px; background: #ffffff; color: #5a6a5f; transition: border-color 0.2s ease; flex: 1; min-width: 200px; }
+.awfar-kanban-campaign-search:focus-within { border-color: #2a6b48; box-shadow: 0 0 0 3px rgba(42, 107, 72, 0.1); }
+.awfar-kanban-campaign-search input { width: 100%; border: 0; outline: 0; background: transparent; color: #1a2e23; font-size: 13px; }
+.awfar-kanban-campaigns-filters > label:not(.awfar-kanban-campaign-search) { display: flex; flex-direction: column; gap: 6px; color: #5a6a5f; font-size: 11px; font-weight: 600; min-width: 160px; }
+.awfar-kanban-campaigns-filters select { min-width: 160px; height: 42px; padding: 0 12px; border: 1px solid #c8d4c8; border-radius: 6px; background: #ffffff; color: #1a2e23; font-size: 13px; font-weight: 500; cursor: pointer; }
+.awfar-kanban-campaigns-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.awfar-kanban-campaign-card { padding: 16px; border: 1px solid #d0dac4; border-radius: 8px; background: #ffffff; transition: all 0.2s ease; }
+.awfar-kanban-campaigns-empty { grid-column: 1 / -1; padding: 40px 24px; border: 1px solid #e0e8e4; border-radius: 8px; background: #ffffff; color: #5a6a5f; font-size: 13px; text-align: center; }
+.awfar-kanban-campaign-card:hover { border-color: #2a6b48; box-shadow: 0 2px 8px rgba(42, 107, 72, 0.12); }
+.awfar-kanban-campaign-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e0e8e4; }
+.awfar-kanban-campaign-card-header h4 { margin: 0 0 4px 0; color: #1d3d28; font: 600 16px "Manrope", "Segoe UI", sans-serif; }
+.awfar-kanban-campaign-card-header p { margin: 0; color: #7a8a7f; font-size: 11px; }
+.awfar-kanban-campaign-total { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.awfar-kanban-campaign-total-label { color: #7a8a7f; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+.awfar-kanban-campaign-total-value { color: #1d3d28; font-size: 20px; font-weight: 700; }
+.awfar-kanban-campaign-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
+.awfar-kanban-campaign-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; border-radius: 6px; background: #fafcf9; }
+.awfar-kanban-campaign-stat-label { color: #7a8a7f; font-size: 10px; font-weight: 600; text-align: center; }
+.awfar-kanban-campaign-stat-value { color: #1d3d28; font-size: 14px; font-weight: 700; padding-right: 10px; position: relative; }
+.awfar-kanban-campaign-stat-value.is-live::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2a6b48;
+  animation: live-glow-simple 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+/* Campaign Stats Colors */
+.awfar-kanban-campaign-stat.status-pending { background: #fff8e8; }
+.awfar-kanban-campaign-stat.status-pending .awfar-kanban-campaign-stat-value { color: #9a5810; }
+.awfar-kanban-campaign-stat.status-processing { background: #e8f0ff; }
+.awfar-kanban-campaign-stat.status-processing .awfar-kanban-campaign-stat-value { color: #1a5a9a; }
+.awfar-kanban-campaign-stat.status-follow_up { background: #f0e8ff; }
+.awfar-kanban-campaign-stat.status-follow_up .awfar-kanban-campaign-stat-value { color: #6a309a; }
+.awfar-kanban-campaign-stat.status-done { background: #e8f8ec; }
+.awfar-kanban-campaign-stat.status-done .awfar-kanban-campaign-stat-value { color: #1a6a3a; }
+.awfar-kanban-campaign-stat.status-unassigned { background: #fff0e0; }
+.awfar-kanban-campaign-stat.status-unassigned .awfar-kanban-campaign-stat-value { color: #9a4a20; }
+.awfar-kanban-campaign-stat.status-unread { background: #ffe8ec; }
+.awfar-kanban-campaign-stat.status-unread .awfar-kanban-campaign-stat-value { color: #9a1a30; }
+
+/* Campaign Breakdown Dark Mode */
+body[data-theme="dark"] .awfar-kanban-campaigns-grid { border-color: #3a4a3e; background: linear-gradient(135deg, #1a2620 0%, #141e1a 100%); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
+body[data-theme="dark"] .awfar-kanban-campaigns-header { border-bottom-color: #3a4a3e; }
+body[data-theme="dark"] .awfar-kanban-campaigns-header h3 { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-campaigns-header p { color: #a0b0a8; }
+body[data-theme="dark"] .awfar-kanban-campaigns-filters { border-color: #3a4a3e; background: #141e1a; }
+body[data-theme="dark"] .awfar-kanban-campaign-search { border-color: #3a4a3e; background: #1a2620; color: #a0b0a8; }
+body[data-theme="dark"] .awfar-kanban-campaign-search:focus-within { border-color: #5ac880; box-shadow: 0 0 0 3px rgba(90, 200, 128, 0.15); }
+body[data-theme="dark"] .awfar-kanban-campaign-search input { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-campaigns-filters > label:not(.awfar-kanban-campaign-search) { color: #a0b0a8; }
+body[data-theme="dark"] .awfar-kanban-campaigns-filters select { border-color: #3a4a3e; background: #1a2620; color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-campaign-card { border-color: #3a4a3e; background: #1a2620; }
+body[data-theme="dark"] .awfar-kanban-campaign-card:hover { border-color: #5ac880; }
+body[data-theme="dark"] .awfar-kanban-campaign-card-header { border-bottom-color: #3a4a3e; }
+body[data-theme="dark"] .awfar-kanban-campaign-card-header h4 { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-campaign-card-header p { color: #809088; }
+body[data-theme="dark"] .awfar-kanban-campaign-total-label { color: #809088; }
+body[data-theme="dark"] .awfar-kanban-campaign-total-value { color: #e8f4eb; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat { background: #141e1a; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat-label { color: #809088; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-pending { background: #2a2a18; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-pending .awfar-kanban-campaign-stat-value { color: #ffa040; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-processing { background: #182030; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-processing .awfar-kanban-campaign-stat-value { color: #4090d0; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-follow_up { background: #201830; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-follow_up .awfar-kanban-campaign-stat-value { color: #a060d0; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-done { background: #182018; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-done .awfar-kanban-campaign-stat-value { color: #40a060; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-unassigned { background: #2a1810; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-unassigned .awfar-kanban-campaign-stat-value { color: #d08040; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-unread { background: #2a1018; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat.status-unread .awfar-kanban-campaign-stat-value { color: #d04050; }
+body[data-theme="dark"] .awfar-kanban-campaign-stat-value.is-live::after { background: #5ac880; }
+body[data-theme="dark"] .awfar-kanban-campaigns-empty { border-color: #3a4a3e; background: #1a2620; color: #a0b0a8; }
+
+/* Responsive */
 @media (max-width: 720px) {
   .awfar-kanban-heading { align-items: flex-start; flex-direction: column; }
   .awfar-kanban-stats { align-items: flex-start; flex-wrap: wrap; }
   .awfar-kanban-stats > small { width: 100%; margin-left: 0; }
   .awfar-kanban-search { width: 100%; }
   .awfar-kanban-filters { align-items: stretch; flex-direction: column; }
+  .awfar-kanban-totals-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .awfar-kanban-totals-grid { grid-template-columns: 1fr; }
+  .awfar-kanban-campaigns-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .awfar-kanban-campaigns-filters { align-items: stretch; flex-direction: column; }
+  .awfar-kanban-campaigns-list { grid-template-columns: 1fr; }
+  .awfar-kanban-campaign-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .awfar-kanban-campaign-total { align-items: flex-start; }
 }

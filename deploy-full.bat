@@ -7,6 +7,16 @@ echo.
 REM Ask for version bump
 set /p NEW_VERSION="Enter new version (e.g., 0.3.0): "
 
+REM Check for GitHub token
+if "%GITHUB_TOKEN%"=="" (
+    echo.
+    echo ERROR: GITHUB_TOKEN environment variable is not set.
+    echo Please set it before running this script:
+    echo set GITHUB_TOKEN=your_github_token
+    pause
+    exit /b 1
+)
+
 REM Update version in package.json using Node.js
 echo.
 echo Step 1: Updating version in package.json...
@@ -25,6 +35,7 @@ if %errorlevel% neq 0 (
 REM Build installer
 echo.
 echo Step 3: Building installer...
+set GH_TOKEN=%GITHUB_TOKEN%
 call npm run package:win
 if %errorlevel% neq 0 (
     echo Build failed!
@@ -32,28 +43,26 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Create updates directory
-echo.
-echo Step 4: Creating updates directory...
-if not exist updates mkdir updates
-
-REM Copy files to updates directory
-echo.
-echo Step 5: Copying files to updates directory...
-copy release\*.exe updates\
-copy release\*.yml updates\
-
 REM Commit and push to GitHub
 echo.
-echo Step 6: Committing and pushing to GitHub...
-git add .
+echo Step 4: Committing and pushing to GitHub...
+git add package.json
 git commit -m "Bump version to %NEW_VERSION%"
 git push
 
-REM Deploy to Vercel
+REM Create GitHub release and upload files
 echo.
-echo Step 7: Deploying to Vercel...
-call vercel --prod
+echo Step 5: Creating GitHub release and uploading files...
+"C:\Program Files\GitHub CLI\gh.exe" release create v%NEW_VERSION% --notes "Release version %NEW_VERSION%"
+"C:\Program Files\GitHub CLI\gh.exe" release upload v%NEW_VERSION% "release\Northstar Quality Operations Setup %NEW_VERSION%.exe" --clobber
+
+REM Update latest.yml with FULL URL
+echo.
+echo Step 5.5: Updating latest.yml with FULL URL...
+if not exist updates mkdir updates
+node -e "const fs = require('fs'); const yml = fs.readFileSync('release/latest.yml', 'utf8'); const updated = yml.replace(/url: Northstar Quality Operations Setup ([0-9.]+).exe/g, 'url: https://github.com/Abdallah-Elnakib/Masar/releases/download/v%NEW_VERSION%/Northstar Quality Operations Setup %NEW_VERSION%.exe').replace(/path: Northstar Quality Operations Setup ([0-9.]+).exe/g, 'path: Northstar Quality Operations Setup %NEW_VERSION%.exe'); fs.writeFileSync('updates/latest.yml', updated);"
+
+"C:\Program Files\GitHub CLI\gh.exe" release upload v%NEW_VERSION% "updates/latest.yml" --clobber
 
 echo.
 echo ========================================
@@ -61,7 +70,6 @@ echo Deployment complete!
 echo ========================================
 echo.
 echo Version: %NEW_VERSION%
-echo GitHub: https://github.com/Abdallah-Elnakib/Masar
-echo Updates: https://masar-indol-nine.vercel.app/updates
+echo GitHub: https://github.com/Abdallah-Elnakib/Masar/releases
 echo.
 pause

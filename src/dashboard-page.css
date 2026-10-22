@@ -836,3 +836,136 @@ body[data-theme="dark"] .dash-columns-grid label {
     width: 100%;
   }
 }
+
+.global-update-notification {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: linear-gradient(135deg, #2f7a55 0%, #1f5b3d 100%);
+  box-shadow: 0 4px 20px rgba(31, 91, 61, 0.3);
+  animation: slide-down 0.3s ease-out;
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.global-update-notification-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: #fff;
+}
+
+.global-update-notification-content > svg {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.global-update-notification-content > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.global-update-notification-content strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.global-update-notification-content small {
+  display: block;
+  font-size: 12px;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.global-update-notification-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.global-update-dismiss,
+.global-update-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.global-update-dismiss {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.global-update-dismiss:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.global-update-action {
+  background: #fff;
+  color: #1f5b3d;
+  border: 1px solid #fff;
+}
+
+.global-update-action:hover {
+  background: #f0f7f2;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+body[data-theme="dark"] .global-update-notification {
+  background: linear-gradient(135deg, #1e2926 0%, #121615 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+body[data-theme="dark"] .global-update-action {
+  background: #2f7a55;
+  color: #fff;
+  border-color: #2f7a55;
+}
+
+body[data-theme="dark"] .global-update-action:hover {
+  background: #50b07c;
+}
+
+@media (max-width: 720px) {
+  .global-update-notification-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .global-update-notification-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .global-update-dismiss,
+  .global-update-action {
+    flex: 1;
+  }
+}

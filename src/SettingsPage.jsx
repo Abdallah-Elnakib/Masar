@@ -129,16 +129,31 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
   const salesFileRef = useRef(null);
   const [updateStatus, setUpdateStatus] = useState(null);
   const [updateProgress, setUpdateProgress] = useState(0);
+  const [currentVersion, setCurrentVersion] = useState("");
+  const [updateInfo, setUpdateInfo] = useState(null);
 
   useEffect(() => {
     setProfile({ name: user.name || "", username: user.username || "", email: user.email || "", currentPassword: "", newPassword: "" });
+    // Get current app version
+    window.qaDesk.updater.getVersion().then((result) => {
+      if (result.ok) {
+        setCurrentVersion(result.version);
+      }
+    });
   }, [user.id, user.name, user.username, user.email]);
 
   useEffect(() => {
     const listener = (data) => {
+      console.log("Update status received:", data);
       setUpdateStatus(data.status);
+      if (data.info) {
+        setUpdateInfo(data.info);
+      }
       if (data.progress) {
         setUpdateProgress(Math.round(data.progress.percent || 0));
+      }
+      if (data.status === "error" && data.error) {
+        setError(data.error);
       }
     };
     window.qaDesk.updater.onUpdateStatus(listener);
@@ -149,8 +164,12 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
 
   // Auto-check for updates when entering the updates section
   useEffect(() => {
-    if (section === "updates" && !updateStatus) {
-      checkForUpdates();
+    if (section === "updates") {
+      setUpdateStatus(null);
+      setError("");
+      setTimeout(() => {
+        void checkForUpdates();
+      }, 100);
     }
   }, [section]);
 
@@ -364,6 +383,18 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
     }
   }
 
+  async function unlockAccount(account) {
+    setError(""); setNotice("");
+    try {
+      const result = await window.qaDesk.settings.accountUnlock({ actorId: user.id, id: account.id });
+      if (!result.ok) { setError(result.message); return; }
+      setNotice("Account unlocked successfully.");
+      await refresh();
+    } catch {
+      setError("Account could not be unlocked. Check the desktop service and try again.");
+    }
+  }
+
   async function deleteAccount(account) {
     if (!window.confirm(`Permanently delete ${account.name}'s account? This cannot be undone.`)) return;
     setError(""); setNotice("");
@@ -421,12 +452,9 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
 
   async function checkForUpdates() {
     setUpdateStatus("checking");
+    setError("");
     try {
-      const result = await window.qaDesk.updater.check();
-      if (!result.ok) {
-        setError(result.message);
-        setUpdateStatus("error");
-      }
+      await window.qaDesk.updater.check();
     } catch {
       setError("Could not check for updates.");
       setUpdateStatus("error");
@@ -528,7 +556,7 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
       </div>
     )}
 
-    {section === "accounts" && isAdmin && <section className="settings-panel settings-accounts-panel"><header className="settings-panel-heading"><span className="settings-panel-icon"><Users size={18} /></span><div><h3>Accounts</h3><p>Create users, adjust roles, freeze access, or remove accounts.</p></div><button className="settings-primary-button" type="button" onClick={() => { setError(""); setEditingAccount(blankAccount()); }}><Plus size={15} />Add account</button></header><div className="settings-account-list">{accounts.map((account) => <article className={`settings-account-row ${!account.isActive ? "is-frozen" : ""}`} key={account.id}><span className="settings-account-avatar">{initials(account.name)}</span><div className="settings-account-identity"><strong>{account.name}</strong><span>@{account.username}{account.email ? ` · ${account.email}` : ""}</span></div><span className="settings-role-pill">{account.role}</span><span className={`settings-presence ${!account.isActive ? "frozen" : account.online ? "online" : "offline"}`}><i />{!account.isActive ? "Frozen" : account.online ? "Online" : "Offline"}</span><div className="settings-row-actions"><button type="button" className="settings-icon-button" title="Edit account" aria-label={`Edit ${account.name}`} onClick={() => { setError(""); setEditingAccount(account); }}><Pencil size={15} /></button>{account.id !== user.id && <><button type="button" className="settings-icon-button" title={account.isActive ? "Freeze account" : "Reactivate account"} aria-label={account.isActive ? `Freeze ${account.name}` : `Reactivate ${account.name}`} onClick={() => void changeAccountState(account, !account.isActive)}><LockKeyhole size={15} /></button><button type="button" className="settings-icon-button is-danger" title="Delete account" aria-label={`Delete ${account.name}`} onClick={() => void deleteAccount(account)}><Trash2 size={15} /></button></>}</div></article>)}{!loading && !accounts.length && <div className="settings-empty">No accounts found.</div>}</div></section>}
+    {section === "accounts" && isAdmin && <section className="settings-panel settings-accounts-panel"><header className="settings-panel-heading"><span className="settings-panel-icon"><Users size={18} /></span><div><h3>Accounts</h3><p>Create users, adjust roles, freeze access, or remove accounts.</p></div><button className="settings-primary-button" type="button" onClick={() => { setError(""); setEditingAccount(blankAccount()); }}><Plus size={15} />Add account</button></header><div className="settings-account-list">{accounts.map((account) => <article className={`settings-account-row ${!account.isActive ? "is-frozen" : ""} ${account.isLocked ? "is-locked" : ""}`} key={account.id}><span className="settings-account-avatar">{initials(account.name)}</span><div className="settings-account-identity"><strong>{account.name}</strong><span>@{account.username}{account.email ? ` · ${account.email}` : ""}</span></div><span className="settings-role-pill">{account.role}</span><span className={`settings-presence ${account.isLocked ? "locked" : !account.isActive ? "frozen" : account.online ? "online" : "offline"}`}><i />{account.isLocked ? "Locked" : !account.isActive ? "Frozen" : account.online ? "Online" : "Offline"}</span><div className="settings-row-actions"><button type="button" className="settings-icon-button" title="Edit account" aria-label={`Edit ${account.name}`} onClick={() => { setError(""); setEditingAccount(account); }}><Pencil size={15} /></button>{account.id !== user.id && <><button type="button" className="settings-icon-button" title={account.isActive ? "Freeze account" : "Reactivate account"} aria-label={account.isActive ? `Freeze ${account.name}` : `Reactivate ${account.name}`} onClick={() => void changeAccountState(account, !account.isActive)}><LockKeyhole size={15} /></button>{account.isLocked && <button type="button" className="settings-icon-button is-success" title="Unlock account" aria-label={`Unlock ${account.name}`} onClick={() => void unlockAccount(account)}><ShieldCheck size={15} /></button>}<button type="button" className="settings-icon-button is-danger" title="Delete account" aria-label={`Delete ${account.name}`} onClick={() => void deleteAccount(account)}><Trash2 size={15} /></button></>}</div></article>)}{!loading && !accounts.length && <div className="settings-empty">No accounts found.</div>}</div></section>}
 
     {section === "status" && isAdmin && <section className="settings-panel settings-status-panel"><header className="settings-panel-heading"><span className="settings-panel-icon is-blue"><Activity size={18} /></span><div><h3>Account status</h3><p>Live presence updates while signed-in accounts are active.</p></div><span className="settings-live-label"><i />LIVE</span></header><div className="settings-status-summary"><article><span className="is-online"><i />Online</span><strong>{onlineCount}</strong></article><article><span className="is-offline"><i />Offline</span><strong>{offlineCount}</strong></article><article><span className="is-frozen"><i />Frozen</span><strong>{frozenCount}</strong></article></div><div className="settings-status-table"><div className="settings-status-header"><span>ACCOUNT</span><span>ROLE</span><span>STATUS</span><span>LAST SEEN</span></div>{accounts.map((account) => <div className="settings-status-row" key={account.id}><div><strong>{account.name}</strong><small>@{account.username}{account.email ? ` · ${account.email}` : ""}</small></div><span>{account.role}</span><span className={`settings-presence ${!account.isActive ? "frozen" : account.online ? "online" : "offline"}`}><i />{!account.isActive ? "Frozen" : account.online ? "Online" : "Offline"}</span><time>{formatDate(account.lastSeenAt)}</time></div>)}</div></section>}
 
@@ -555,7 +583,7 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
     </div>}
 
     {section === "updates" && <section className="settings-panel settings-updates-panel">
-      <header className="settings-panel-heading"><span className="settings-panel-icon is-blue"><CloudDownload size={18} /></span><div><h3>App updates</h3><p>Stay up to date with the latest features and improvements.</p></div></header>
+      <header className="settings-panel-heading"><span className="settings-panel-icon is-blue"><CloudDownload size={18} /></span><div><h3>App updates</h3><p>Stay up to date with the latest features and improvements.</p>{currentVersion && <span className="settings-version-badge">v{currentVersion}</span>}</div></header>
       <div className="settings-update-status">
         {!updateStatus && <div className="settings-update-idle">
           <CloudDownload size={32} />
@@ -570,7 +598,8 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
         {updateStatus === "available" && <div className="settings-update-available">
           <Download size={32} />
           <strong>New update available!</strong>
-          <small>A new version is ready to download. After installation, you'll need to close and reopen the application.</small>
+          <small>{updateInfo ? `Version ${updateInfo.version} is available (${updateInfo.releaseName || ""})` : "A new version is ready to download."}</small>
+          <small>After installation, you'll need to close and reopen the application.</small>
           <button className="settings-primary-button" type="button" onClick={downloadUpdate} disabled={updateStatus === "downloading"}><Download size={15} />Download update</button>
         </div>}
         {updateStatus === "downloading" && <div className="settings-update-downloading">
@@ -594,6 +623,11 @@ function SettingsPage({ user, onUserUpdate, theme, onThemeChange }) {
           <CircleAlert size={32} />
           <strong>Update error</strong>
           <small>There was a problem checking for or downloading updates. Please try again later.</small>
+        </div>}
+        {updateStatus === "cancelled" && <div className="settings-update-error">
+          <CircleAlert size={32} />
+          <strong>Update cancelled</strong>
+          <small>The update was cancelled. Please try again later.</small>
         </div>}
       </div>
       <footer className="settings-form-footer">

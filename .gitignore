@@ -4,3 +4,5 @@ release/
 .env
 *.log
 updates/*.exe
+.vercel
+.env*

@@ -122,7 +122,7 @@ function monthlyManualKpi(employee, month) {
     const entryDate = String(entry.date || "");
     if (!entryDate.startsWith(month)) continue;
     if (!callsByEmployee.has(key)) callsByEmployee.set(key, {});
-    callsByEmployee.get(key)[entryDate] = { calls: Number(entry.calls || 0), status: entry.status };
+    callsByEmployee.get(key)[entryDate] = { calls: Number(entry.calls || 0), missedCalls: Number(entry.missedCalls || 0), status: entry.status };
   }
 
   const talkingTimeByEmployee = new Map();
@@ -151,7 +151,9 @@ function monthlyManualKpi(employee, month) {
 
     const employeeCalls = callsByEmployee.get(employeeId) || {};
     const dailyCalls = employeeCalls[selectedDate]?.calls || 0;
+    const dailyMissedCalls = employeeCalls[selectedDate]?.missedCalls || 0;
     const monthlyCalls = Object.values(employeeCalls).reduce((sum, entry) => sum + (entry.calls || 0), 0);
+    const monthlyMissedCalls = Object.values(employeeCalls).reduce((sum, entry) => sum + (entry.missedCalls || 0), 0);
     const employeeTalkingTime = talkingTimeByEmployee.get(employeeId) || {};
     const dailyTalkingTime = employeeTalkingTime[selectedDate]?.seconds || 0;
     const monthlyTalkingTime = Object.values(employeeTalkingTime).reduce((sum, entry) => sum + (entry.seconds || 0), 0);
@@ -252,10 +254,13 @@ function monthlyManualKpi(employee, month) {
       hireDate: employee.hireDate,
       sales,
       salesZone,
+      salesZones: teamPerformance,
       dailyCalls,
+      dailyMissedCalls,
       dailyTalkingTime,
       monthlyTalkingTime,
       monthlyCalls,
+      monthlyMissedCalls,
       talkingTimePercent,
       talkingTimeWeight,
       talkingTimeAchievement,

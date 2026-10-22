@@ -215,7 +215,7 @@ async function fetchAgentCounts(token, instance, filter, fetchImpl = fetch) {
     if (contacts.length < PAGE_SIZE || !contacts.length) break;
     page += 1;
   }
-  return counts;
+  return { counts, totalCount: received };
 }
 
 function isRetryableError(error) {
@@ -274,8 +274,8 @@ async function fetchKanbanCounts(credentials, fetchImpl = fetch) {
       const job = jobs[nextJob];
       nextJob += 1;
       try {
-        const counts = await fetchJob(job);
-        results.set(`${job.campaignName}\u0000${job.statusKey}`, counts);
+        const { counts, totalCount } = await fetchJob(job);
+        results.set(`${job.campaignName}\u0000${job.statusKey}`, { counts, totalCount });
       } catch (error) {
         failedJobs.push({
           campaignName: job.campaignName,

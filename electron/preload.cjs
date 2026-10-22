@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld("qaDesk", {
     accountsList: (actorId) => ipcRenderer.invoke("settings:accounts-list", actorId),
     accountSave: (input) => ipcRenderer.invoke("settings:account-save", input),
     accountFreeze: (input) => ipcRenderer.invoke("settings:account-freeze", input),
+    accountUnlock: (input) => ipcRenderer.invoke("settings:account-unlock", input),
     accountDelete: (input) => ipcRenderer.invoke("settings:account-delete", input),
     heartbeat: (userId) => ipcRenderer.invoke("settings:heartbeat", userId),
     logout: (userId) => ipcRenderer.invoke("settings:logout", userId),
@@ -93,6 +94,7 @@ contextBridge.exposeInMainWorld("qaDesk", {
     check: () => ipcRenderer.invoke("updater:check"),
     download: () => ipcRenderer.invoke("updater:download"),
     install: () => ipcRenderer.invoke("updater:install"),
+    getVersion: () => ipcRenderer.invoke("updater:getVersion"),
     onUpdateStatus: (callback) => ipcRenderer.on("update-status", (_event, data) => callback(data)),
   },
 });

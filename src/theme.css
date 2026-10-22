@@ -1247,7 +1247,7 @@ body[data-theme="dark"] .quality-workflow-field > span small {
 body[data-theme="dark"] .quality-workflow-field input,
 body[data-theme="dark"] .quality-workflow-field select,
 body[data-theme="dark"] .quality-workflow-field textarea {
-  background: #0f1312;
+  background: transparent;
   border-color: #2d3a33;
   color: #ffffff;
 }

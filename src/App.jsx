@@ -4,15 +4,20 @@ import {
   ArrowRight,
   ArrowUpRight,
   Bell,
+  Building2,
   Check,
   ChevronDown,
+  CircleAlert,
   CircleHelp,
+  ClipboardCheck,
   Clock3,
+  CloudDownload,
   Eye,
   EyeOff,
   Headphones,
   LayoutDashboard,
   Layers,
+  Loader2,
   LockKeyhole,
   LogOut,
   Menu,
@@ -42,13 +47,13 @@ import "./dashboard-page.css";
 
 const allPages = [
   { id: "Dashboard", icon: LayoutDashboard },
-  { id: "Teams", icon: Users },
+  { id: "Teams", icon: Building2 },
   { id: "Employees", icon: Users },
   { id: "Alerts", icon: Bell },
   { id: "Talking Time", icon: Clock3 },
   { id: "Calls Tracking", icon: Headphones },
   { id: "Awfar Kanban", icon: Layers },
-  { id: "Quality Evaluation", icon: ShieldCheck },
+  { id: "Quality Evaluation", icon: ClipboardCheck },
   { id: "Coaching", icon: MessageSquareText },
   { id: "Performance", icon: Activity },
   { id: "Custom KPI", icon: Target },
@@ -177,46 +182,217 @@ function LoginScreen({ onLogin, notice }) {
 
   return (
     <main className="login-page">
-      <section className="login-art" aria-label="Northstar quality workspace">
-        <div className="art-topline"><BrandMark /><span>QUALITY OPERATIONS</span></div>
-        <div className="orbit orbit-one" /><div className="orbit orbit-two" />
-        <div className="art-message">
-          <span className="eyebrow"><span className="live-dot" /> YOUR TEAM, IN FOCUS</span>
-          <h1>Better conversations<br />start with <em>good insight.</em></h1>
-          <p>A thoughtful workspace for the people who make every customer moment count.</p>
+      <div className="login-background">
+        <div className="login-mesh-gradient" />
+        <div className="login-grid-pattern" />
+        <div className="login-gradient-orb orb-1" />
+        <div className="login-gradient-orb orb-2" />
+        <div className="login-gradient-orb orb-3" />
+        <div className="login-gradient-orb orb-4" />
+      </div>
+
+      <div className="login-container">
+        <div className="login-left-panel">
+          <div className="login-illustration">
+            <div className="illustration-circle circle-1" />
+            <div className="illustration-circle circle-2" />
+            <div className="illustration-circle circle-3" />
+          </div>
+
+          <div className="login-brand">
+            <BrandMark />
+            <div className="brand-text">
+              <h1>Northstar</h1>
+              <p>Quality Operations</p>
+            </div>
+          </div>
+
+          <div className="login-features">
+            <div className="feature-item">
+              <div className="feature-icon">
+                <ShieldCheck size={24} />
+              </div>
+              <div className="feature-content">
+                <h3>Enterprise Security</h3>
+                <p>Advanced encryption and multi-factor authentication</p>
+              </div>
+            </div>
+            <div className="feature-item">
+              <div className="feature-icon">
+                <Activity size={24} />
+              </div>
+              <div className="feature-content">
+                <h3>Real-time Analytics</h3>
+                <p>Comprehensive quality monitoring and insights</p>
+              </div>
+            </div>
+            <div className="feature-item">
+              <div className="feature-icon">
+                <Users size={24} />
+              </div>
+              <div className="feature-content">
+                <h3>Team Collaboration</h3>
+                <p>Seamless communication and workflow management</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="login-testimonial">
+            <div className="testimonial-content">
+              <p>"Northstar transformed our quality operations. The insights and automation have improved our team's performance by 40%."</p>
+              <div className="testimonial-author">
+                <span className="author-name">Sarah Mitchell</span>
+                <span className="author-role">Quality Director</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="art-note"><span>THIS WEEK</span><strong>93.6%</strong><span>team quality score <ArrowUpRight size={14} /></span></div>
-        <div className="art-footer"><span>BUILT FOR THE MOMENTS THAT MATTER</span><span>01 — 09</span></div>
-      </section>
-      <section className="login-panel">
-        <div className="mobile-brand"><BrandMark /><span>Northstar</span></div>
-        <div className="login-form-wrap">
-          <span className="eyebrow login-eyebrow">WELCOME BACK</span>
-          <h2>Sign in to your<br />workspace.</h2>
-          <p className="login-copy">Use your organization account to continue.</p>
-          <form onSubmit={submit}>
-            <label htmlFor="username">Username or email</label>
-            <div className="input-wrap"><Users size={17} /><input id="username" type="text" autoComplete="username" placeholder="Admin" value={identifier} onChange={(event) => setIdentifier(event.target.value)} required /></div>
-            <div className="password-label"><label htmlFor="password">Password</label><button type="button" className="text-button" onClick={() => setError("Ask your workspace administrator to reset your password.")}>Forgot password?</button></div>
-            <div className="input-wrap password-input-wrap"><LockKeyhole size={17} /><input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} required /><button className="password-visibility" type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} title={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
-            <label className="remember-control" htmlFor="remember-me">
-              <input id="remember-me" type="checkbox" checked={rememberMe} onChange={toggleRemember} />
-              <span className="remember-checkbox"><Check size={13} /></span>
-              <span>Remember username and password</span>
-            </label>
-            {error && <p className="form-error" role="alert">{error}</p>}
-            <button className="sign-in-button" type="submit" disabled={loading}>{loading ? "Signing in..." : "Sign in"}<ArrowRight size={17} /></button>
-          </form>
-          <div className="login-footnote"><ShieldCheck size={15} /><span>Secure access managed by your organization</span></div>
+
+        <div className="login-right-panel">
+          <div className="login-form-wrapper">
+            <div className="login-header">
+              <div className="header-badge">
+                <span className="badge-icon">✨</span>
+                <span>Enhanced Security</span>
+              </div>
+              <h2>Welcome Back</h2>
+              <p>Access your workspace and continue where you left off</p>
+            </div>
+
+            <form onSubmit={submit} className="login-form">
+              <div className="form-group">
+                <label htmlFor="username">
+                  <Users size={16} />
+                  Username or Email
+                </label>
+                <div className="form-input-wrapper">
+                  <input
+                    id="username"
+                    type="text"
+                    autoComplete="username"
+                    placeholder="Enter your username or email"
+                    value={identifier}
+                    onChange={(event) => setIdentifier(event.target.value)}
+                    required
+                  />
+                  <div className="input-border" />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">
+                  <LockKeyhole size={16} />
+                  Password
+                </label>
+                <div className="form-input-wrapper">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                  <div className="input-border" />
+                </div>
+                <div className="form-actions">
+                  <label className="remember-me" htmlFor="remember-me">
+                    <input
+                      id="remember-me"
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={toggleRemember}
+                    />
+                    <span className="checkbox-custom">
+                      <Check size={12} />
+                    </span>
+                    <span>Remember me for 30 days</span>
+                  </label>
+                  <button
+                    type="button"
+                    className="forgot-password"
+                    onClick={() => setError("Contact your workspace administrator to reset your password.")}
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div className="form-error" role="alert">
+                  <CircleAlert size={18} />
+                  <span>{error}</span>
+                  <button onClick={() => setError("")} aria-label="Dismiss">
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="login-submit-btn"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={20} className="spinner" />
+                    <span>Signing in...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Sign In</span>
+                    <ArrowRight size={20} />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="login-divider">
+              <span>Or continue with</span>
+            </div>
+
+            <div className="login-social">
+              <button type="button" className="social-btn sso-btn">
+                <ShieldCheck size={20} />
+                <span>SSO Login</span>
+              </button>
+            </div>
+
+            <div className="login-footer">
+              <div className="footer-security">
+                <ShieldCheck size={14} />
+                <span>Protected by enterprise-grade encryption</span>
+              </div>
+              <div className="footer-links">
+                <a href="#">Privacy Policy</a>
+                <span>•</span>
+                <a href="#">Terms of Service</a>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="login-bottom"><span>Northstar Operations</span><button className="help-button" type="button" title="Contact your workspace administrator"><CircleHelp size={16} /> Need help?</button></div>
-      </section>
+      </div>
     </main>
   );
 }
 
 function BrandMark() {
-  return <span className="brand-mark" aria-hidden="true"><span /><span /><span /><span /></span>;
+  return (
+    <span className="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+      </svg>
+    </span>
+  );
 }
 
 function AlertRow({ tone, title, person, time }) {
@@ -233,19 +409,21 @@ function DataTable({ columns, rows }) {
 }
 
 class PageErrorBoundary extends Component {
-  state = { hasError: false };
+  state = { hasError: false, error: null };
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
   }
 
-  componentDidCatch(error) {
+  componentDidCatch(error, errorInfo) {
     console.error("Page render failed:", error);
+    console.error("Error stack:", error.stack);
+    console.error("Component stack:", errorInfo.componentStack);
   }
 
   render() {
     if (this.state.hasError) {
-      return <section className="page-render-error" role="alert"><CircleHelp size={22} /><div><strong>This page could not be displayed.</strong><span>Return to another page or try opening this page again.</span></div><button type="button" onClick={() => this.setState({ hasError: false })}>Retry</button></section>;
+      return <section className="page-render-error" role="alert"><CircleHelp size={22} /><div><strong>This page could not be displayed.</strong><span>{this.state.error?.message || "Return to another page or try opening this page again."}</span></div><button type="button" onClick={() => this.setState({ hasError: false, error: null })}>Retry</button></section>;
     }
     return this.props.children;
   }
@@ -256,12 +434,12 @@ function PageContent({ page, user, can, onUserUpdate, theme, onThemeChange }) {
   const [notice, setNotice] = useState("");
 
   if (page === "Teams") return <TeamsPage canManage={can("canManageTeams")} user={user} />;
-  if (page === "Employees") return <EmployeesPage canManage={can("canManageEmployees")} user={user} />;
+  if (page === "Employees") return <div className="content-area"><EmployeesPage canManage={can("canManageEmployees")} user={user} /></div>;
   if (page === "Alerts") return <AlertsPage />;
   if (page === "Talking Time") return <TalkingTimePage canEdit={can("canEditTalkingTime")} user={user} />;
   if (page === "Calls Tracking") return <CallsTrackingPage canEdit={can("canEditCalls")} user={user} />;
   if (page === "Awfar Kanban") return <AwfarKanbanPage user={user} />;
-  if (page === "Quality Evaluation") return <QualityEvaluationPage evaluatorId={user.id} canEditSales={can("canEditSales")} canEvaluate={can("canEvaluate")} user={user} />;
+  if (page === "Quality Evaluation") return <QualityEvaluationPage evaluatorId={user.id} canEditSales={can("canEditSales")} canEvaluate={can("canEvaluate")} canManageEmployees={can("canManageEmployees")} user={user} />;
   if (page === "Coaching") return <CoachingPage user={user} />;
   if (page === "Custom KPI") return <CustomKpiPage user={user} />;
   if (page === "Performance") return <PerformancePage user={user} />;
@@ -292,6 +470,9 @@ function App() {
   const [globalResults, setGlobalResults] = useState([]);
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [globalSearchLoading, setGlobalSearchLoading] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState(null);
+  const [updateDismissed, setUpdateDismissed] = useState(false);
+  const [appVersion, setAppVersion] = useState("");
   const requestedPages = Array.isArray(user?.permissions?.pages) ? user.permissions.pages : null;
   const allowedPages = useMemo(() => {
     const pages = user?.role === "Admin"
@@ -308,6 +489,14 @@ function App() {
     document.body.dataset.theme = theme;
     window.localStorage.setItem("qa-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    window.qaDesk?.updater?.getVersion?.().then((result) => {
+      if (result?.ok) {
+        setAppVersion(result.version);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (!user?.id || !window.qaDesk?.settings?.heartbeat) return undefined;
@@ -333,6 +522,20 @@ function App() {
     const interval = window.setInterval(() => { void heartbeat(); }, 20_000);
     return () => { active = false; window.clearInterval(interval); };
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!window.qaDesk?.updater?.onUpdateStatus) return undefined;
+    const listener = (data) => {
+      setUpdateStatus(data.status);
+      if (data.status === "available" || data.status === "downloaded") {
+        setUpdateDismissed(false);
+      }
+    };
+    window.qaDesk.updater.onUpdateStatus(listener);
+    return () => {
+      window.qaDesk.updater.onUpdateStatus(null);
+    };
+  }, []);
 
   useEffect(() => {
     const query = search.trim().toLocaleLowerCase();
@@ -419,9 +622,23 @@ function App() {
       <div className="workspace-switcher"><span className="workspace-symbol">N</span><span className="workspace-name"><strong>Northstar Ops</strong><small>Quality workspace</small></span></div>
       <div className="nav-label">WORKSPACE</div>
       <nav className="main-nav" aria-label="Main navigation">{visiblePages.map(({ id, icon: Icon }) => <button className={`nav-item ${currentPage === id ? "active" : ""}`} key={id} title={sidebarCollapsed ? id : undefined} onClick={() => { setPage(id); setMenuOpen(false); }}><Icon size={17} strokeWidth={1.8} /><span>{id}</span>{id === "Alerts" && <i className="nav-count">3</i>}</button>)}</nav>
-      <div className="sidebar-bottom"><div className="sidebar-account"><span className="avatar">{initials}</span><span className="account-copy"><strong>{user.name}</strong><small>{user.role}</small></span><button className="logout-button" title="Sign out" onClick={() => { void window.qaDesk.settings.logout(user.id); setUser(null); }}><LogOut size={16} /></button></div></div>
+      <div className="sidebar-bottom"><div className="sidebar-account"><span className="avatar">{initials}</span><span className="account-copy"><strong>{user.name}</strong><small>{user.role}</small>{appVersion && <small className="version-tag">v{appVersion}</small>}</span><button className="logout-button" title="Sign out" onClick={() => { void window.qaDesk.settings.logout(user.id); setUser(null); }}><LogOut size={16} /></button></div></div>
     </aside>
+    {sidebarCollapsed && <button className="sidebar-toggle-float" onClick={() => setSidebarCollapsed(false)} aria-label="Expand sidebar" title="Expand sidebar"><PanelLeftOpen size={16} /></button>}
     {menuOpen && <button className="sidebar-scrim" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
+    {(updateStatus === "available" || updateStatus === "downloaded") && !updateDismissed && <div className="global-update-notification">
+      <div className="global-update-notification-content">
+        <CloudDownload size={20} />
+        <div>
+          <strong>New update available!</strong>
+          <small>A new version is ready to install. Please update to continue using the latest features.</small>
+        </div>
+        <div className="global-update-notification-actions">
+          <button type="button" className="global-update-dismiss" onClick={() => setUpdateDismissed(true)}>Dismiss</button>
+          <button type="button" className="global-update-action" onClick={() => { setPage("Settings"); setTimeout(() => window.qaDesk?.updater?.download?.(), 100); }}>Update now</button>
+        </div>
+      </div>
+    </div>}
     <main className="main-area">
       <header className="topbar"><button className="mobile-menu" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Menu size={20} /></button><div className="breadcrumb"><span>Workspace</span><span>/</span><strong>{currentPage}</strong></div><div className="global-search-wrap" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setGlobalSearchOpen(false); }}><label className="global-search"><Search size={16} /><input placeholder="Search anything..." value={search} onFocus={() => setGlobalSearchOpen(true)} onKeyDown={(event) => { if (event.key === "Escape") { setSearch(""); setGlobalSearchOpen(false); } if (event.key === "Enter" && globalResults[0]) openGlobalResult(globalResults[0]); }} onChange={(event) => { setSearch(event.target.value); setGlobalSearchOpen(true); }} /><kbd>⌘ K</kbd></label>{globalSearchOpen && search.trim() && <div className="global-search-results" role="listbox" aria-label="Search results">{globalSearchLoading ? <div className="global-search-empty">Searching workspace...</div> : globalResults.length ? globalResults.map((result, index) => { const Icon = result.type === "page" ? (visiblePages.find((item) => item.id === result.pageId)?.icon || Search) : result.type === "team" || result.type === "employee" ? Users : Search; return <button type="button" className="global-search-result" role="option" key={`${result.type}-${result.pageId}-${result.title}-${index}`} onClick={() => openGlobalResult(result)}><span className={`global-result-icon ${result.type}`}><Icon size={15} /></span><span><strong>{result.title}</strong><small>{result.detail}</small></span><ArrowRight size={14} /></button>; }) : <div className="global-search-empty">No results found.</div>}</div>}</div></header>
       <div className={`content-area ${currentPage === "Dashboard" ? "is-dashboard" : ""}`}>

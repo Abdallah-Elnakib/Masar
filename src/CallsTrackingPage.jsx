@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Activity, CalendarDays, Check, CheckCircle2, FileSpreadsheet, Search, Target, Trash2, Users, X } from "lucide-react";
+import { Activity, CalendarDays, Check, CheckCircle2, CircleAlert, FileSpreadsheet, Search, Target, Trash2, Users, X } from "lucide-react";
 import "./calls-tracking.css";
 
 function currentMonth() {
@@ -26,16 +26,17 @@ function initials(name) {
 }
 
 function entryValue(employee, day) {
-  return employee.days[dateFor(employee.month, day)] || { calls: "", status: null };
+  return employee.days[dateFor(employee.month, day)] || { calls: "", missedCalls: "", status: null };
 }
 
 function employeeStats(employee, target, days) {
   const entries = days.map((day) => entryValue(employee, day));
   const workDays = entries.filter((entry) => Number(entry.calls) > 0).length;
   const total = entries.reduce((sum, entry) => sum + (Number(entry.calls) || 0), 0);
+  const totalMissed = entries.reduce((sum, entry) => sum + (Number(entry.missedCalls) || 0), 0);
   const targetEnabled = Boolean(target?.enabled && Number(target.target) > 0);
   const achieved = targetEnabled ? entries.filter((entry) => Number(entry.calls) > 0 && Number(entry.calls) >= Number(target.target)).length : null;
-  return { total, workDays, achieved, missed: targetEnabled ? workDays - achieved : null };
+  return { total, totalMissed, workDays, achieved, missed: targetEnabled ? workDays - achieved : null };
 }
 
 function earnedWeight(stats, target) {
@@ -89,7 +90,7 @@ function TeamCallsTable({ team, days, employees, saving, deletingScope, deleting
 
   return <section className="calls-team-section">
     <header className="calls-team-heading"><div><span className="calls-team-mark"><Users size={16} /></span><div><span className="calls-team-kicker">TEAM TRACKING</span><h3>{team.name}</h3><small>{employees.length} visible employees · Daily calls target: {team.targets.Agent?.enabled ? team.targets.Agent.target : "Off"}</small></div></div><div className="calls-team-tools"><div className="calls-target-chips"><span>Agent {team.targets.Agent?.enabled ? `${team.targets.Agent.target} calls · ${team.targets.Agent.weight}%` : "Off"}</span><span>Senior {team.targets.Senior?.enabled ? `${team.targets.Senior.target} calls · ${team.targets.Senior.weight}%` : "Off"}</span></div>{canEdit && <div className="calls-team-delete-actions"><button type="button" title={`Delete ${selectedDeleteDate} for ${team.name}`} onClick={() => void onDelete(team.id, "day")} disabled={Boolean(deletingScope)}><Trash2 size={13} />Delete day</button><button type="button" title={`Delete ${monthLabel(team.month)} for ${team.name}`} onClick={() => void onDelete(team.id, "month")} disabled={Boolean(deletingScope)}><CalendarDays size={13} />Delete month</button></div>}</div></header>
-    <div className="calls-table-wrap"><table className="calls-table"><colgroup><col className="calls-employee-col" /><col className="calls-code-col" /><col className="calls-code-col" />{days.map((day) => <col key={day} className="calls-day-col" style={{ width: `${42 / days.length}%` }} />)}<col className="calls-stat-col" /><col className="calls-stat-col" /><col className="calls-stat-col" /><col className="calls-stat-col" /><col className="calls-weight-col" /></colgroup><thead><tr><th>Employee</th><th>3CX</th><th>Awfar</th>{days.map((day) => <th key={day} title={dateFor(team.month, day)}>{day}</th>)}<th>Total calls</th><th>Work days</th><th>Target met</th><th>Target missed</th><th>Weight (%)</th></tr></thead><tbody>{employees.map((employee) => { const target = team.targets[employee.employeeType]; const stats = employeeStats(employee, target, days); const weight = earnedWeight(stats, target); return <tr key={employee.id}><td><div className="calls-employee"><span>{initials(employee.fullName)}</span><div><strong>{employee.fullName}</strong><small>{employee.employeeType}</small></div></div></td><td>{employee.code3cx || "-"}</td><td>{employee.awfarCode || "-"}</td>{days.map((day) => <td className="calls-day-td" key={day}><DayCell employee={employee} day={day} target={target} onSave={onSave} saving={saving} canEdit={canEdit} /></td>)}<td className="calls-total">{stats.total.toLocaleString()}</td><td>{stats.workDays}</td><td>{stats.achieved === null ? <span className="calls-off">Off</span> : stats.achieved}</td><td>{stats.missed === null ? <span className="calls-off">Off</span> : stats.missed}</td><td>{weight === null ? <span className="calls-off">Off</span> : `${Number(weight.toFixed(2))}%`}</td></tr>; })}{!employees.length && <tr><td colSpan={days.length + 8} className="calls-empty-row">No employees match the selected filters.</td></tr>}</tbody></table></div>
+    <div className="calls-table-wrap"><table className="calls-table"><colgroup><col className="calls-employee-col" /><col className="calls-code-col" /><col className="calls-code-col" />{days.map((day) => <col key={day} className="calls-day-col" style={{ width: `${42 / days.length}%` }} />)}<col className="calls-stat-col" /><col className="calls-stat-col" /><col className="calls-stat-col" /><col className="calls-stat-col" /><col className="calls-stat-col" /><col className="calls-weight-col" /></colgroup><thead><tr><th>Employee</th><th>3CX</th><th>Awfar</th>{days.map((day) => <th key={day} title={dateFor(team.month, day)}>{day}</th>)}<th>Total calls</th><th>Unanswered</th><th>Work days</th><th>Target met</th><th>Target missed</th><th>Weight (%)</th></tr></thead><tbody>{employees.map((employee) => { const target = team.targets[employee.employeeType]; const stats = employeeStats(employee, target, days); const weight = earnedWeight(stats, target); return <tr key={employee.id}><td><div className="calls-employee"><span>{initials(employee.fullName)}</span><div><strong>{employee.fullName}</strong><small>{employee.employeeType}</small></div></div></td><td>{employee.code3cx || "-"}</td><td>{employee.awfarCode || "-"}</td>{days.map((day) => <td className="calls-day-td" key={day}><DayCell employee={employee} day={day} target={target} onSave={onSave} saving={saving} canEdit={canEdit} /></td>)}<td className="calls-total">{stats.total.toLocaleString()}</td><td className="calls-total" style={{ color: "#d97706" }}>{stats.totalMissed.toLocaleString()}</td><td>{stats.workDays}</td><td>{stats.achieved === null ? <span className="calls-off">Off</span> : stats.achieved}</td><td>{stats.missed === null ? <span className="calls-off">Off</span> : stats.missed}</td><td>{weight === null ? <span className="calls-off">Off</span> : `${Number(weight.toFixed(2))}%`}</td></tr>; })}{!employees.length && <tr><td colSpan={days.length + 9} className="calls-empty-row">No employees match the selected filters.</td></tr>}</tbody></table></div>
   </section>;
 }
 
@@ -126,7 +127,7 @@ export default function CallsTrackingPage({ canEdit = true, user }) {
   const selectedTeams = useMemo(() => (teamFilter === "all" ? teams : teams.filter((team) => team.id === teamFilter)), [teamFilter, teams]);
   const normalizedQuery = query.trim().toLocaleLowerCase();
   const visibleTeams = selectedTeams.map((team) => ({ ...team, employees: team.employees.filter((employee) => matchesEmployee(employee, team, days, normalizedQuery, typeFilter, targetFilter, activityFilter)) }));
-  const summary = visibleTeams.reduce((result, team) => team.employees.reduce((inner, employee) => { const stats = employeeStats(employee, team.targets[employee.employeeType], days); inner.calls += stats.total; inner.workDays += stats.workDays; inner.employees += 1; if (stats.achieved !== null) inner.met += stats.achieved; if (stats.missed !== null) inner.missed += stats.missed; return inner; }, result), { employees: 0, calls: 0, workDays: 0, met: 0, missed: 0 });
+  const summary = visibleTeams.reduce((result, team) => team.employees.reduce((inner, employee) => { const stats = employeeStats(employee, team.targets[employee.employeeType], days); inner.calls += stats.total; inner.missedCalls += stats.totalMissed; inner.workDays += stats.workDays; inner.employees += 1; if (stats.achieved !== null) inner.met += stats.achieved; if (stats.missed !== null) inner.missed += stats.missed; return inner; }, result), { employees: 0, calls: 0, missedCalls: 0, workDays: 0, met: 0, missed: 0 });
   const selectedDeleteDate = deleteDate.startsWith(`${month}-`) ? deleteDate : `${month}-01`;
 
   async function deleteEntries(scope, teamIdOverride = deleteTeamId) {
@@ -160,7 +161,7 @@ export default function CallsTrackingPage({ canEdit = true, user }) {
     try {
       const result = await window.qaDesk.callsTracking.save({ employeeId, date, calls, status });
       if (!result.ok) { setError(result.message); return false; }
-      setTeams((current) => current.map((team) => ({ ...team, employees: team.employees.map((employee) => employee.id === employeeId ? { ...employee, days: { ...employee.days, [date]: { calls: result.calls, status: result.status } } } : employee) })));
+      setTeams((current) => current.map((team) => ({ ...team, employees: team.employees.map((employee) => employee.id === employeeId ? { ...employee, days: { ...employee.days, [date]: { calls: result.calls, missedCalls: result.missedCalls || 0, status: result.status } } } : employee) })));
       return true;
     } catch {
       setError("Call entry could not be saved.");
@@ -174,7 +175,7 @@ export default function CallsTrackingPage({ canEdit = true, user }) {
     try {
       const module = await import("xlsx-js-style");
       const XLSX = module.default || module;
-      const rows = [["CALLS TRACKING REPORT", monthLabel(month)], ["TEAM", "EMPLOYEE", "TYPE", "3CX", "AWFAR", ...days.map((day) => `DAY ${day}`), "TOTAL CALLS", "WORK DAYS", "TARGET MET", "TARGET MISSED", "WEIGHT (%)"]];
+      const rows = [["CALLS TRACKING REPORT", monthLabel(month)], ["TEAM", "EMPLOYEE", "TYPE", "3CX", "AWFAR", ...days.map((day) => `DAY ${day}`), "TOTAL CALLS", "UNANSWERED", "WORK DAYS", "TARGET MET", "TARGET MISSED", "WEIGHT (%)"]];
       visibleTeams.forEach((team) => team.employees.forEach((employee) => {
         const target = team.targets[employee.employeeType];
         const stats = employeeStats(employee, target, days);
@@ -182,7 +183,7 @@ export default function CallsTrackingPage({ canEdit = true, user }) {
         rows.push([team.name, employee.fullName, employee.employeeType, employee.code3cx || "-", employee.awfarCode || "-", ...days.map((day) => {
           const entry = entryValue(employee, day);
           return entry.status === "leave" ? "Leave" : entry.status === "outage" ? "System outage" : entry.calls || "";
-        }), stats.total, stats.workDays, stats.achieved ?? "Off", stats.missed ?? "Off", weight === null ? "Off" : Number(weight.toFixed(2))]);
+        }), stats.total, stats.totalMissed, stats.workDays, stats.achieved ?? "Off", stats.missed ?? "Off", weight === null ? "Off" : Number(weight.toFixed(2))]);
       }));
       const sheet = XLSX.utils.aoa_to_sheet(rows);
       const lastColumn = rows[1].length - 1;
@@ -237,9 +238,10 @@ export default function CallsTrackingPage({ canEdit = true, user }) {
     <section className="calls-summary">
       <article><Users size={18} /><div><small>Visible employees</small><strong>{summary.employees}</strong></div></article>
       <article><Activity size={18} /><div><small>Total calls</small><strong>{summary.calls.toLocaleString()}</strong></div></article>
+      <article><X size={18} /><div><small>Unanswered calls</small><strong>{summary.missedCalls.toLocaleString()}</strong></div></article>
       <article><CheckCircle2 size={18} /><div><small>Work days</small><strong>{summary.workDays}</strong></div></article>
       <article><Target size={18} /><div><small>Target days met</small><strong>{summary.met}</strong></div></article>
-      <article><X size={18} /><div><small>Target days missed</small><strong>{summary.missed}</strong></div></article>
+      <article><CircleAlert size={18} /><div><small>Target days missed</small><strong>{summary.missed}</strong></div></article>
     </section>
     {loading ? <div className="calls-empty"><span className="calls-spinner" />Loading calls data...</div> : visibleTeams.length ? visibleTeams.map((team) => <TeamCallsTable key={team.id} team={team} days={days} employees={team.employees} saving={saving} deletingScope={deletingScope && deletingTeamId === team.id ? deletingScope : ""} deletingTeamId={deletingTeamId} selectedDeleteDate={selectedDeleteDate} canEdit={canEditCalls} onSave={saveEntry} onDelete={deleteEntries} />) : <div className="calls-empty">No teams or employees found.</div>}
     <p className="calls-hint">Select a day to enter calls, record leave, or mark a system outage.</p>

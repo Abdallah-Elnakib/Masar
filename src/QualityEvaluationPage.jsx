@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import {
   Activity,
   ArrowRight,
@@ -15,8 +15,22 @@ import {
   Target,
   TrendingUp,
   Users,
+  Filter,
+  MoreVertical,
+  Download,
+  RefreshCw,
+  Sparkles,
+  Award,
+  Star,
+  Zap,
+  X,
+  Pencil,
+  RotateCcw,
+  UserMinus,
+  Trash2,
 } from "lucide-react";
 import { EmployeeCallEvaluationFlow, QualityFormsLibrary } from "./QualityEvaluationWorkflows.jsx";
+import { EmployeeEditor, EmploymentDateDialog } from "./EmployeesPage.jsx";
 import "./quality-evaluation.css";
 
 function currentMonth() {
@@ -50,8 +64,9 @@ function getSalesZone(employee, salesValue = employee.sales) {
   return "Below range";
 }
 
-function EvaluationCard({ employee, month, saving, message, onSave, onStartEvaluation, canEditSales, canEvaluate }) {
+function EvaluationCard({ employee, month, saving, message, onSave, onStartEvaluation, canEditSales, canEvaluate, canManageEmployees, user, onEdit, onResign, onRestore, onDelete, openMenuId, setOpenMenuId }) {
   const [draft, setDraft] = useState({ sales: employee.sales ?? "" });
+  const menuRef = useRef(null);
   const target = Number(employee.kpiTarget) || 0;
   const weight = Number(employee.kpiWeight) || 0;
   const evaluated = Number(employee.evaluatedCalls) || 0;
@@ -60,55 +75,214 @@ function EvaluationCard({ employee, month, saving, message, onSave, onStartEvalu
   const progress = target > 0 ? Math.min((evaluated / target) * 100, 100) : 0;
   const weightedScore = score === null || !weight ? null : (score * weight) / 100;
   const isDirty = String(draft.sales) !== String(employee.sales ?? "");
+  const menuOpen = openMenuId === employee.id;
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId(null);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [menuOpen, setOpenMenuId]);
 
   function update(key, value) {
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
+  const getScoreColor = (score) => {
+    if (score == null) return "neutral";
+    if (score >= 90) return "excellent";
+    if (score >= 80) return "good";
+    if (score >= 70) return "fair";
+    return "poor";
+  };
+
+  const scoreColor = getScoreColor(score);
+
   return <article className="evaluation-card">
-    <header className="evaluation-card-header">
-      <span className="evaluation-avatar">{employee.fullName.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span>
-      <div className="evaluation-identity"><h3>{employee.fullName}</h3><div><span className={`evaluation-role ${employee.employeeType.toLowerCase()}`}>{employee.employeeType}</span><span className="evaluation-hire-date"><CalendarDays size={13} /> Hired {dateLabel(employee.hireDate)}</span></div></div>
-      <span className={`sales-zone ${salesZone ? salesZone.toLowerCase().replaceAll(" ", "-") : "unavailable"}`}><i />{salesZone || (employee.salesEnabled ? "No sales" : "Non-sales")}</span>
-    </header>
-
-    <div className="evaluation-identifiers">
-      <span><b>AWFAR</b>{employee.awfarCode || "Not assigned"}</span>
-      <span><b>3CX</b>{employee.code3cx || "Not assigned"}</span>
+    <div className="card-header">
+      <div className="employee-info">
+        <div className="employee-avatar">
+          {employee.fullName.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}
+        </div>
+        <div className="employee-details">
+          <h3>{employee.fullName}</h3>
+          <div className="employee-meta">
+            <span className={`role-badge ${employee.employeeType.toLowerCase()}`}>{employee.employeeType}</span>
+            <span className="hire-date"><CalendarDays size={11} /> {dateLabel(employee.hireDate)}</span>
+          </div>
+        </div>
+      </div>
+      <div className="card-actions">
+        <div className="dropdown-container" ref={menuRef}>
+          <button className="icon-button" aria-label="More options" onClick={() => setOpenMenuId(menuOpen ? null : employee.id)}>
+            <MoreVertical size={16} />
+          </button>
+          {menuOpen && (
+            <div className="dropdown-menu">
+              <button className="dropdown-item" disabled={!canManageEmployees} onClick={() => { if (canManageEmployees) { setOpenMenuId(null); onEdit(employee); } }}>
+                <Pencil size={14} />
+                Edit
+                {!canManageEmployees && <small>Manage employees required</small>}
+              </button>
+              {employee.employmentStatus === "Resigned" ? (
+                <button className="dropdown-item" disabled={!canManageEmployees} onClick={() => { if (canManageEmployees) { setOpenMenuId(null); onRestore(employee); } }}>
+                  <RotateCcw size={14} />
+                  Restore
+                  {!canManageEmployees && <small>Manage employees required</small>}
+                </button>
+              ) : (
+                <button className="dropdown-item" disabled={!canManageEmployees} onClick={() => { if (canManageEmployees) { setOpenMenuId(null); onResign(employee); } }}>
+                  <UserMinus size={14} />
+                  Resign
+                  {!canManageEmployees && <small>Manage employees required</small>}
+                </button>
+              )}
+              <button className="dropdown-item danger" disabled={!canManageEmployees} onClick={() => { if (canManageEmployees) { setOpenMenuId(null); onDelete(employee); } }}>
+                <Trash2 size={14} />
+                Delete
+                {!canManageEmployees && <small>Manage employees required</small>}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
 
-    <div className="evaluation-card-metrics">
-      <section className="evaluation-metric calls-metric">
-        <div className="evaluation-metric-heading"><span><Headphones size={15} /> Evaluated calls</span><strong>{numberLabel(evaluated)} <small>/ {target ? numberLabel(target) : "Not set"}</small></strong></div>
-        <div className="evaluation-progress"><i style={{ width: `${progress}%` }} /></div>
-        <span className="evaluation-metric-foot">{target ? `${Math.round((evaluated / target) * 100)}% of monthly target` : "Set an Evaluated Calls target on the team"}</span>
-      </section>
-      <section className="evaluation-metric quality-metric">
-        <div className="evaluation-metric-heading"><span><ShieldCheck size={15} /> Quality score</span><strong>{score === null ? "—" : `${numberLabel(score)}%`} <small>/ 100%</small></strong></div>
-        <div className="quality-weight-detail"><span>Team weight</span><strong>{weight ? `${numberLabel(weight)}%` : "Not set"}</strong><span>Weighted result</span><strong>{weightedScore === null ? "—" : `${numberLabel(weightedScore)} %`}</strong></div>
-      </section>
+    <div className="card-identifiers">
+      <div className="identifier-item">
+        <span className="identifier-label">AWFAR</span>
+        <span className="identifier-value">{employee.awfarCode || "—"}</span>
+      </div>
+      <div className="identifier-item">
+        <span className="identifier-label">3CX</span>
+        <span className="identifier-value">{employee.code3cx || "—"}</span>
+      </div>
+      {salesZone && (
+        <div className={`zone-badge ${salesZone.toLowerCase().replaceAll(" ", "-")}`}>
+          <Sparkles size={11} />
+          {salesZone}
+        </div>
+      )}
     </div>
 
-    <div className="evaluation-edit-fields">
-      <label className="evaluation-entry-field"><span><TrendingUp size={14} />Monthly sales</span><input type="number" min="0" step="any" value={draft.sales} onChange={(event) => update("sales", event.target.value)} disabled={!canEditSales || !employee.salesEnabled} placeholder={!employee.salesEnabled ? "Not a sales team" : canEditSales ? "Enter sales" : "View only"} /></label>
-      <div className="evaluation-entry-field evaluation-readonly-field"><span><Headphones size={14} />Calls evaluated</span><strong>{numberLabel(evaluated)} <small>/ {target ? numberLabel(target) : "No target"}</small></strong></div>
-      <div className="evaluation-entry-field evaluation-readonly-field"><span><BadgeCheck size={14} />Quality score (%)</span><strong>{score === null ? "—" : `${numberLabel(score)}%`} <small>monthly average</small></strong></div>
+    <div className="card-metrics">
+      <div className="metric-card">
+        <div className="metric-header">
+          <div className="metric-icon calls-icon">
+            <Headphones size={16} />
+          </div>
+          <span className="metric-label">Calls</span>
+        </div>
+        <div className="metric-value">
+          <strong>{numberLabel(evaluated)}</strong>
+          <span className="metric-target">/ {target ? numberLabel(target) : "—"}</span>
+        </div>
+        <div className="metric-progress">
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${progress}%` }} />
+          </div>
+          <span className="progress-text">{target ? `${Math.round((evaluated / target) * 100)}%` : "—"}</span>
+        </div>
+      </div>
+
+      <div className="metric-card">
+        <div className="metric-header">
+          <div className={`metric-icon quality-icon ${scoreColor}`}>
+            <ShieldCheck size={16} />
+          </div>
+          <span className="metric-label">Quality</span>
+        </div>
+        <div className="metric-value">
+          <strong className={scoreColor}>{score === null ? "—" : `${numberLabel(score)}%`}</strong>
+          <span className="metric-target">/ 100%</span>
+        </div>
+        <div className="metric-details">
+          <div className="detail-item">
+            <span>Weight</span>
+            <strong>{weight ? `${numberLabel(weight)}%` : "—"}</strong>
+          </div>
+          <div className="detail-item">
+            <span>Weighted</span>
+            <strong>{weightedScore === null ? "—" : `${numberLabel(weightedScore)}%`}</strong>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <footer className="evaluation-card-footer">
-      <span className="evaluation-saved-state">{message || (employee.updatedAt ? `Saved ${new Date(employee.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : `No ${monthLabel(month)} entry yet`)}</span>
-      <div className="evaluation-card-actions">{canEvaluate && <button type="button" className="evaluation-start-button" onClick={() => onStartEvaluation(employee)} disabled={!target}><Headphones size={14} />Start evaluation</button>}{canEditSales && <button type="button" className="evaluation-save-button" onClick={() => onSave(employee, draft)} disabled={saving || !isDirty || (draft.sales !== "" && Number(draft.sales) < 0)}>
-        {saving ? <span className="evaluation-spinner" /> : <Check size={15} />}{saving ? "Saving..." : "Save month"}
-      </button>}</div>
-    </footer>
+    <div className="card-fields">
+      {employee.salesEnabled && (
+        <div className="field-group">
+          <label className="field-label">
+            <TrendingUp size={12} />
+            Monthly Sales
+          </label>
+          <input
+            type="number"
+            min="0"
+            step="any"
+            value={draft.sales}
+            onChange={(event) => update("sales", event.target.value)}
+            disabled={!canEditSales}
+            placeholder={canEditSales ? "Enter sales" : "View only"}
+            className="field-input"
+          />
+        </div>
+      )}
+    </div>
+
+    <div className="card-footer">
+      <div className="footer-status">
+        {message && <span className="status-message">{message}</span>}
+        {!message && employee.updatedAt && (
+          <span className="last-saved">
+            <Check size={11} />
+            Saved {new Date(employee.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        )}
+      </div>
+      <div className="footer-actions">
+        {canEvaluate && (
+          <button
+            type="button"
+            className="action-button primary-button"
+            onClick={() => onStartEvaluation(employee)}
+            disabled={!target}
+          >
+            <Headphones size={14} />
+            Start
+          </button>
+        )}
+        {canEditSales && employee.salesEnabled && (
+          <button
+            type="button"
+            className="action-button secondary-button"
+            onClick={() => onSave(employee, draft)}
+            disabled={saving || !isDirty || (draft.sales !== "" && Number(draft.sales) < 0)}
+          >
+            {saving ? <RefreshCw size={14} className="spinner" /> : <Check size={14} />}
+            {saving ? "Saving..." : "Save"}
+          </button>
+        )}
+      </div>
+    </div>
   </article>;
 }
 
-export default function QualityEvaluationPage({ evaluatorId, canEditSales = true, canEvaluate = true, user }) {
+export default function QualityEvaluationPage({ evaluatorId, canEditSales = true, canEvaluate = true, canManageEmployees = false, user }) {
   const [month, setMonth] = useState(currentMonth);
   const [screen, setScreen] = useState("dashboard");
   const [activeEmployee, setActiveEmployee] = useState(null);
-  
+  const [mode, setMode] = useState("list");
+  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [dateAction, setDateAction] = useState(null);
+  const [busyEmployee, setBusyEmployee] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+
   // Manager cannot edit
   const canEditSalesActual = canEditSales && user?.role !== "Manager";
   const canEvaluateActual = canEvaluate && user?.role !== "Manager";
@@ -123,6 +297,7 @@ export default function QualityEvaluationPage({ evaluatorId, canEditSales = true
   const [error, setError] = useState("");
   const [savingEmployee, setSavingEmployee] = useState("");
   const [saveMessages, setSaveMessages] = useState({});
+  const [saving, setSaving] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -181,6 +356,9 @@ export default function QualityEvaluationPage({ evaluatorId, canEditSales = true
 
   if (screen === "forms") return <QualityFormsLibrary canManageForms={canManageFormsActual} onBack={() => setScreen("dashboard")} />;
   if (screen === "calls" && activeEmployee && canEvaluate) return <EmployeeCallEvaluationFlow employee={activeEmployee} month={month} evaluatorId={evaluatorId} onBack={() => { setScreen("dashboard"); void loadData(); }} onOpenForms={canManageFormsActual ? () => setScreen("forms") : undefined} />;
+  if (mode === "employee-form" && canManageEmployees) {
+    return <EmployeeEditor employee={editingEmployee} teams={teams} loading={saving} error={error} onCancel={cancelEditor} onSave={saveEmployee} />;
+  }
 
   async function saveEvaluation(employee, draft) {
     setSavingEmployee(employee.id);
@@ -205,30 +383,274 @@ export default function QualityEvaluationPage({ evaluatorId, canEditSales = true
     }
   }
 
-  return <div className="quality-workspace">
-    <section className="quality-summary-grid" aria-label="Monthly quality statistics">
-      <article className="quality-summary-card"><span className="quality-summary-icon forest"><Users size={19} /></span><div><span>Team members</span><strong>{employees.length}</strong></div><small>Active employees in teams</small></article>
-      <article className="quality-summary-card"><span className="quality-summary-icon blue"><Headphones size={19} /></span><div><span>Calls evaluated</span><strong>{numberLabel(totalEvaluated)} <small>{totalTarget ? `/ ${numberLabel(totalTarget)}` : ""}</small></strong></div><small>{totalTarget ? `${Math.round((totalEvaluated / totalTarget) * 100)}% of configured target` : "Targets are set per team"}</small></article>
-      <article className="quality-summary-card"><span className="quality-summary-icon gold"><ShieldCheck size={19} /></span><div><span>Average quality</span><strong>{averageQuality === null ? "—" : `${numberLabel(averageQuality)}%`}</strong></div><small>{scoredEmployees.length} scored employees this month</small></article>
-      <article className="quality-summary-card"><span className="quality-summary-icon mint"><TrendingUp size={19} /></span><div><span>Monthly sales</span><strong>{numberLabel(totalSales)}</strong></div><small>{completedTargets} call targets completed</small></article>
-    </section>
+  function openEdit(employee) {
+    setEditingEmployee(employee);
+    setError("");
+    setMode("employee-form");
+  }
 
-    <section className="quality-directory">
-      <header className="quality-directory-heading"><div><span className="quality-eyebrow">QUALITY OPERATIONS</span><h2>Quality evaluation</h2><p>Monthly employee results, grouped by their assigned team.</p></div><div className="quality-heading-actions"><button className="quality-forms-button" type="button" onClick={() => setScreen("forms")}><ClipboardList size={16} />Forms</button><label className="quality-month-picker"><CalendarDays size={17} /><span>Evaluation month</span><input type="month" value={month} onChange={(event) => setMonth(event.target.value || currentMonth())} /></label></div></header>
-      {error && <div className="quality-page-error" role="alert"><CircleAlert size={16} />{error}</div>}
-      <div className="quality-filter-bar">
-        <label className="quality-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search employees, codes or teams" aria-label="Search evaluations" /></label>
-        <label><span>Team</span><select value={teamFilter} onChange={(event) => setTeamFilter(event.target.value)}><option value="all">All teams</option>{availableTeams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</select></label>
-        <label><span>Employee type</span><select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}><option value="all">All types</option><option value="Agent">Agent</option><option value="Senior">Senior</option></select></label>
-        <label><span>Sales zone</span><select value={zoneFilter} onChange={(event) => setZoneFilter(event.target.value)}><option value="all">All zones</option><option value="Green">Green</option><option value="Yellow">Yellow</option><option value="Red">Red</option><option value="Below range">Below range</option></select></label>
+  async function saveEmployee(draft) {
+    setSaving(true);
+    setError("");
+    try {
+      const result = await window.qaDesk.employees.save(draft);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      setMode("list");
+      setEditingEmployee(null);
+      await loadData();
+    } catch {
+      setError("Employee could not be saved. Check the database connection and try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function openResign(employee) {
+    setError("");
+    setDateAction({ action: "resign", employee });
+  }
+
+  function openRestore(employee) {
+    setError("");
+    setDateAction({ action: "restore", employee });
+  }
+
+  async function updateEmploymentDate(date) {
+    setSaving(true);
+    setError("");
+    try {
+      const update = dateAction.action === "restore"
+        ? await window.qaDesk.employees.restore(dateAction.employee.id, date)
+        : await window.qaDesk.employees.resign(dateAction.employee.id, date);
+      if (!update.ok) {
+        setError(update.message);
+        return;
+      }
+      setDateAction(null);
+      await loadData();
+    } catch {
+      setError("Employment status could not be updated. Check the database connection and try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function deleteEmployee(employee) {
+    if (!window.confirm(`Permanently delete ${employee.fullName}? Employment history will also be removed.`)) return;
+    setBusyEmployee(employee.id);
+    setError("");
+    try {
+      const result = await window.qaDesk.employees.delete(employee.id);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      await loadData();
+    } catch {
+      setError("Employee could not be deleted. Check the database connection and try again.");
+    } finally {
+      setBusyEmployee("");
+    }
+  }
+
+  function cancelEditor() {
+    setMode("list");
+    setEditingEmployee(null);
+    setError("");
+  }
+
+  return <div className="quality-workspace">
+    <div className="workspace-header">
+      <div className="header-content">
+        <div className="header-badges">
+          <span className="badge badge-primary">
+            <Award size={14} />
+            Quality Operations
+          </span>
+          <span className="badge badge-secondary">
+            <Star size={14} />
+            Premium
+          </span>
+        </div>
+        <h1>Quality Evaluation</h1>
+        <p>Monitor and evaluate team performance with comprehensive quality metrics</p>
+      </div>
+      <div className="header-actions">
+        <button className="action-btn" onClick={() => setScreen("forms")}>
+          <ClipboardList size={18} />
+          Forms
+        </button>
+        <button className="action-btn secondary">
+          <Download size={18} />
+          Export
+        </button>
+        <button className="action-btn icon-only" onClick={() => void loadData()}>
+          <RefreshCw size={18} />
+        </button>
+      </div>
+    </div>
+
+    <div className="stats-grid">
+      <div className="stat-card">
+        <div className="stat-icon users">
+          <Users size={24} />
+        </div>
+        <div className="stat-content">
+          <span className="stat-label">Team Members</span>
+          <strong className="stat-value">{employees.length}</strong>
+          <span className="stat-sub">Active employees</span>
+        </div>
+      </div>
+      <div className="stat-card">
+        <div className="stat-icon calls">
+          <Headphones size={24} />
+        </div>
+        <div className="stat-content">
+          <span className="stat-label">Calls Evaluated</span>
+          <strong className="stat-value">{numberLabel(totalEvaluated)}</strong>
+          <span className="stat-sub">{totalTarget ? `${Math.round((totalEvaluated / totalTarget) * 100)}% of target` : "—"}</span>
+        </div>
+      </div>
+      <div className="stat-card">
+        <div className="stat-icon quality">
+          <ShieldCheck size={24} />
+        </div>
+        <div className="stat-content">
+          <span className="stat-label">Average Quality</span>
+          <strong className="stat-value">{averageQuality === null ? "—" : `${numberLabel(averageQuality)}%`}</strong>
+          <span className="stat-sub">{scoredEmployees.length} scored</span>
+        </div>
+      </div>
+      <div className="stat-card">
+        <div className="stat-icon sales">
+          <TrendingUp size={24} />
+        </div>
+        <div className="stat-content">
+          <span className="stat-label">Monthly Sales</span>
+          <strong className="stat-value">{numberLabel(totalSales)}</strong>
+          <span className="stat-sub">{completedTargets} targets met</span>
+        </div>
+      </div>
+    </div>
+
+    <div className="content-section">
+      <div className="section-header">
+        <div className="section-title">
+          <h2>Employee Evaluations</h2>
+          <span className="period-badge">
+            <CalendarDays size={14} />
+            {monthLabel(month)}
+          </span>
+        </div>
+        <div className="section-actions">
+          <div className="month-selector">
+            <CalendarDays size={16} />
+            <input
+              type="month"
+              value={month}
+              onChange={(event) => setMonth(event.target.value || currentMonth())}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="quality-period-strip"><span><CalendarDays size={15} /> Showing results for <strong>{monthLabel(month)}</strong></span><span>{filteredEmployees.length} of {employees.length} employees</span></div>
+      {error && <div className="error-banner">
+        <CircleAlert size={20} />
+        <span>{error}</span>
+        <button onClick={() => setError("")}>
+          <X size={18} />
+        </button>
+      </div>}
 
-      {loading ? <div className="quality-empty-state"><span className="quality-spinner" /><p>Loading monthly evaluations...</p></div> : employees.length === 0 ? <div className="quality-empty-state"><span className="quality-empty-icon"><Users size={25} /></span><h3>No active employees to evaluate</h3><p>Add employees to a team to see monthly evaluation cards here.</p></div> : filteredEmployees.length === 0 ? <div className="quality-empty-state compact"><Search size={23} /><p>No employees match the selected filters.</p></div> : <div className="quality-team-groups">{groupedEmployees.map((group) => <section className="quality-team-section" key={group.name}>
-        <header className="quality-team-heading"><span className="quality-team-icon"><Users size={17} /></span><div><h3>{group.name}</h3><span>{group.employees.length} {group.employees.length === 1 ? "employee" : "employees"}</span></div><span className="quality-team-total"><Activity size={15} />{numberLabel(group.employees.reduce((total, employee) => total + (Number(employee.evaluatedCalls) || 0), 0))} calls evaluated</span></header>
-        <div className="evaluation-card-grid">{group.employees.map((employee) => <EvaluationCard key={`${employee.id}-${month}-${employee.sales ?? ""}`} employee={employee} month={month} saving={savingEmployee === employee.id} message={saveMessages[employee.id]} onSave={saveEvaluation} canEditSales={canEditSalesActual} canEvaluate={canEvaluateActual} onStartEvaluation={(item) => { setActiveEmployee(item); setScreen("calls"); }} />)}</div>
+      <div className="filter-bar">
+        <div className="search-wrapper">
+          <Search size={18} />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search employees, codes or teams..."
+          />
+        </div>
+        <div className="filter-group">
+          <label className="filter-label">
+            <Filter size={14} />
+            Team
+          </label>
+          <select value={teamFilter} onChange={(event) => setTeamFilter(event.target.value)}>
+            <option value="all">All teams</option>
+            {availableTeams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+          </select>
+        </div>
+        <div className="filter-group">
+          <label className="filter-label">
+            <Filter size={14} />
+            Type
+          </label>
+          <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
+            <option value="all">All types</option>
+            <option value="Agent">Agent</option>
+            <option value="Senior">Senior</option>
+          </select>
+        </div>
+        <div className="filter-group">
+          <label className="filter-label">
+            <Filter size={14} />
+            Zone
+          </label>
+          <select value={zoneFilter} onChange={(event) => setZoneFilter(event.target.value)}>
+            <option value="all">All zones</option>
+            <option value="Green">Green</option>
+            <option value="Yellow">Yellow</option>
+            <option value="Red">Red</option>
+            <option value="Below range">Below range</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="results-info">
+        <span>Showing {filteredEmployees.length} of {employees.length} employees</span>
+      </div>
+
+      {loading ? <div className="loading-state">
+        <RefreshCw size={32} className="spinner" />
+        <p>Loading evaluations...</p>
+      </div> : employees.length === 0 ? <div className="empty-state">
+        <div className="empty-icon">
+          <Users size={48} />
+        </div>
+        <h3>No employees to evaluate</h3>
+        <p>Add employees to a team to see monthly evaluation cards here.</p>
+      </div> : filteredEmployees.length === 0 ? <div className="empty-state">
+        <div className="empty-icon">
+          <Search size={48} />
+        </div>
+        <h3>No matching employees</h3>
+        <p>Try adjusting your filters or search terms.</p>
+      </div> : <div className="team-grid">{groupedEmployees.map((group) => <section className="team-section" key={group.name}>
+        <div className="team-header">
+          <div className="team-info">
+            <div className="team-icon">
+              <Users size={20} />
+            </div>
+            <div>
+              <h3>{group.name}</h3>
+              <span>{group.employees.length} {group.employees.length === 1 ? "employee" : "employees"}</span>
+            </div>
+          </div>
+          <div className="team-stats">
+            <span className="team-stat">
+              <Activity size={16} />
+              {numberLabel(group.employees.reduce((total, employee) => total + (Number(employee.evaluatedCalls) || 0), 0))} calls
+            </span>
+          </div>
+        </div>
+        <div className="cards-grid">{group.employees.map((employee) => <EvaluationCard key={`${employee.id}-${month}-${employee.sales ?? ""}`} employee={employee} month={month} saving={savingEmployee === employee.id} message={saveMessages[employee.id]} onSave={saveEvaluation} canEditSales={canEditSalesActual} canEvaluate={canEvaluateActual} canManageEmployees={canManageEmployees} user={user} onStartEvaluation={(item) => { setActiveEmployee(item); setScreen("calls"); }} onEdit={openEdit} onResign={openResign} onRestore={openRestore} onDelete={deleteEmployee} openMenuId={openMenuId} setOpenMenuId={setOpenMenuId} />)}</div>
       </section>)}</div>}
-    </section>
+    </div>
+
+    {dateAction && canManageEmployees && <EmploymentDateDialog action={dateAction.action} employee={dateAction.employee} loading={saving} error={error} onCancel={() => { setDateAction(null); setError(""); }} onConfirm={updateEmploymentDate} />}
   </div>;
 }

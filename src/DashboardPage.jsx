@@ -22,10 +22,13 @@ const BASE_COLUMNS = [
   { key: "teamName", label: "Team" },
   { key: "hireDate", label: "Hire" },
   { key: "sales", label: "Sales" },
+  { key: "expectedSales", label: "Expected Sales" },
   { key: "dailyCalls", label: "Calls" },
+  { key: "dailyMissedCalls", label: "Unanswered" },
   { key: "dailyTalkingTime", label: "Talk Time" },
   { key: "monthlyTalkingTime", label: "M. Talk" },
   { key: "monthlyCalls", label: "M. Calls" },
+  { key: "monthlyMissedCalls", label: "M. Unanswered" },
   { key: "talkingTimePercent", label: "Talk %" },
   { key: "callsPercent", label: "Calls %" },
   { key: "qualityPercent", label: "Quality %" },
@@ -42,10 +45,13 @@ const DEFAULT_WIDTHS = {
   teamName: 140,
   hireDate: 110,
   sales: 140,
+  expectedSales: 180,
   dailyCalls: 88,
+  dailyMissedCalls: 88,
   dailyTalkingTime: 110,
   monthlyTalkingTime: 110,
   monthlyCalls: 96,
+  monthlyMissedCalls: 96,
   talkingTimePercent: 150,
   callsPercent: 150,
   qualityPercent: 150,
@@ -107,6 +113,70 @@ function formatNumber(value, digits = 1) {
 
 function customColumnKey(name) {
   return `custom:${name}`;
+}
+
+function calculateExpectedSales(employee, month, date) {
+  const currentSales = Number(employee.sales) || 0;
+  const [year, monthNum] = String(month).split("-").map(Number);
+  const dayNum = Number(String(date).slice(-2)) || 1;
+  const daysInCurrentMonth = new Date(year, monthNum, 0).getDate();
+
+  // Calculate days elapsed (current day is NOT counted as elapsed)
+  let daysElapsed = dayNum - 1;
+  if (employee.hireDate) {
+    const hireDate = new Date(employee.hireDate);
+    const hireYear = hireDate.getFullYear();
+    const hireMonth = hireDate.getMonth() + 1;
+    const hireDay = hireDate.getDate();
+
+    // If hired in the same month and year
+    if (hireYear === year && hireMonth === monthNum) {
+      daysElapsed = dayNum - hireDay;
+    }
+  }
+
+  // Days remaining includes current day
+  const daysRemaining = daysInCurrentMonth - dayNum + 1;
+
+  const dailyRate = daysElapsed > 0 ? currentSales / daysElapsed : 0;
+  const expectedForRemainingDays = dailyRate * daysRemaining;
+  const totalExpected = currentSales + expectedForRemainingDays;
+
+  // Calculate expected zone based on expected value
+  const zones = employee.salesZones || {};
+  let expectedZone = "Below";
+
+  // Check if we have valid zone thresholds
+  if (zones && typeof zones === 'object') {
+    const greenFrom = Number(zones.green?.from);
+    const yellowFrom = Number(zones.yellow?.from);
+    const yellowTo = Number(zones.yellow?.to);
+    const redFrom = Number(zones.red?.from);
+    const redTo = Number(zones.red?.to);
+
+    if (!isNaN(greenFrom) && totalExpected >= greenFrom) {
+      expectedZone = "Green";
+    } else if (!isNaN(yellowFrom) && !isNaN(yellowTo) && totalExpected >= yellowFrom && totalExpected <= yellowTo) {
+      expectedZone = "Yellow";
+    } else if (!isNaN(redFrom) && !isNaN(redTo) && totalExpected >= redFrom && totalExpected <= redTo) {
+      expectedZone = "Red";
+    }
+  }
+
+  // Fallback: if no zones data, use the same logic as current zone determination
+  if (expectedZone === "Below" && employee.salesZone && employee.salesZone !== "Below") {
+    // If employee is currently in a zone but we can't determine expected,
+    // keep the current zone as expected
+    expectedZone = employee.salesZone;
+  }
+
+  return {
+    value: totalExpected,
+    dailyRate,
+    daysElapsed,
+    daysRemaining,
+    expectedZone,
+  };
 }
 
 function getCustomKpi(employee, name) {
@@ -422,6 +492,7 @@ export default function DashboardPage({ user, can }) {
       red: sortedEmployees.filter((employee) => employee.salesZone === "Red").length,
       sales: sortedEmployees.reduce((sum, employee) => sum + (Number(employee.sales) || 0), 0),
       calls: sortedEmployees.reduce((sum, employee) => sum + (Number(employee.dailyCalls) || 0), 0),
+      missedCalls: sortedEmployees.reduce((sum, employee) => sum + (Number(employee.dailyMissedCalls) || 0), 0),
       talk: sortedEmployees.reduce((sum, employee) => sum + (Number(employee.dailyTalkingTime) || 0), 0),
       topName: top?.fullName || "—",
     };
@@ -578,10 +649,18 @@ export default function DashboardPage({ user, can }) {
         if (visibleColumns.teamName) row.Team = employee.teamName;
         if (visibleColumns.hireDate) row.Hire = formatDate(employee.hireDate);
         if (visibleColumns.sales) row.Sales = `${employee.sales.toLocaleString()} (${employee.salesZone})`;
+        if (visibleColumns.expectedSales) {
+          const expected = calculateExpectedSales(employee, month, date);
+          const expectedZone = expected.expectedZone || "Below";
+          const arrow = expectedZone === "Green" ? "↑" : expectedZone === "Red" ? "↓" : "→";
+          row["Expected Sales"] = `${expected.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${arrow} (${expectedZone})`;
+        }
         if (visibleColumns.dailyCalls) row.Calls = employee.dailyCalls.toLocaleString();
+        if (visibleColumns.dailyMissedCalls) row.Unanswered = employee.dailyMissedCalls.toLocaleString();
         if (visibleColumns.dailyTalkingTime) row["Talk Time"] = formatTime(employee.dailyTalkingTime);
         if (visibleColumns.monthlyTalkingTime) row["M. Talk"] = formatTime(employee.monthlyTalkingTime);
         if (visibleColumns.monthlyCalls) row["M. Calls"] = employee.monthlyCalls.toLocaleString();
+        if (visibleColumns.monthlyMissedCalls) row["M. Unanswered"] = employee.monthlyMissedCalls.toLocaleString();
         if (visibleColumns.talkingTimePercent) row["Talk %"] = `${formatNumber(employee.talkingTimePercent)}%`;
         if (visibleColumns.callsPercent) row["Calls %"] = `${formatNumber(employee.callsPercent)}%`;
         if (visibleColumns.qualityPercent) row["Quality %"] = `${formatNumber(employee.qualityPercent, 2)}%`;
@@ -720,6 +799,7 @@ export default function DashboardPage({ user, can }) {
             </strong>
           </div>
           <div><span>Day calls</span><strong>{stats.calls.toLocaleString()}</strong></div>
+          <div><span>Day unanswered</span><strong style={{ color: "#d97706" }}>{stats.missedCalls.toLocaleString()}</strong></div>
           <div><span>Day talk</span><strong>{formatTime(stats.talk)}</strong></div>
           <div><span>Quality wt</span><strong>{stats.filtered ? `${formatNumber(stats.avgQuality)}%` : "—"}</strong></div>
           <div className="dash-top-metric"><span>Top KPI</span><strong title={stats.topName}>{stats.topName}</strong></div>
@@ -843,10 +923,13 @@ export default function DashboardPage({ user, can }) {
               {headerCell("teamName", "Team")}
               {headerCell("hireDate", "Hire")}
               {headerCell("sales", "Sales")}
+              {headerCell("expectedSales", "Expected Sales")}
               {headerCell("dailyCalls", "Calls")}
+              {headerCell("dailyMissedCalls", "Unanswered")}
               {headerCell("dailyTalkingTime", "Talk Time")}
               {headerCell("monthlyTalkingTime", "M. Talk")}
               {headerCell("monthlyCalls", "M. Calls")}
+              {headerCell("monthlyMissedCalls", "M. Unanswered")}
               {headerCell("talkingTimePercent", "Talk %")}
               {headerCell("callsPercent", "Calls %")}
               {headerCell("qualityPercent", "Quality %")}
@@ -875,10 +958,34 @@ export default function DashboardPage({ user, can }) {
                     </span>
                   </td>
                 )}
+                {visibleColumns.expectedSales && (() => {
+                  const expected = calculateExpectedSales(employee, month, date);
+                  const currentZone = employee.salesZone || "Below";
+                  const expectedZone = expected.expectedZone || "Below";
+                  const isGreen = expectedZone === "Green";
+                  const isYellow = expectedZone === "Yellow";
+                  const isRed = expectedZone === "Red";
+                  const arrow = isGreen ? "↑" : isRed ? "↓" : "→";
+                  const zoneClass = isGreen ? "is-green" : isRed ? "is-red" : isYellow ? "is-yellow" : "is-below";
+
+                  // Check if zone will change
+                  const zoneWillChange = currentZone !== expectedZone;
+                  const zoneChangeText = zoneWillChange ? ` (${currentZone} → ${expectedZone})` : ` (${expectedZone})`;
+
+                  return (
+                    <td>
+                      <span className={`dash-zone ${zoneClass}`} title={`Current: ${employee.sales} (${currentZone}) | Expected: ${expected.value.toFixed(2)} (${expectedZone}) | Daily rate: ${expected.dailyRate.toFixed(2)} | Days elapsed: ${expected.daysElapsed} | Days remaining: ${expected.daysRemaining}`}>
+                        {expected.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {arrow}{zoneChangeText}
+                      </span>
+                    </td>
+                  );
+                })()}
                 {visibleColumns.dailyCalls && <td className="is-num">{Number(employee.dailyCalls || 0).toLocaleString()}</td>}
+                {visibleColumns.dailyMissedCalls && <td className="is-num" style={{ color: "#d97706" }}>{Number(employee.dailyMissedCalls || 0).toLocaleString()}</td>}
                 {visibleColumns.dailyTalkingTime && <td className="is-num">{formatTime(employee.dailyTalkingTime)}</td>}
                 {visibleColumns.monthlyTalkingTime && <td className="is-num">{formatTime(employee.monthlyTalkingTime)}</td>}
                 {visibleColumns.monthlyCalls && <td className="is-num">{Number(employee.monthlyCalls || 0).toLocaleString()}</td>}
+                {visibleColumns.monthlyMissedCalls && <td className="is-num" style={{ color: "#d97706" }}>{Number(employee.monthlyMissedCalls || 0).toLocaleString()}</td>}
                 {visibleColumns.talkingTimePercent && (
                   <td>
                     <WeightCell

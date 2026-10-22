@@ -115,7 +115,7 @@ function EmployeeField({ label, name, value, onChange, optional, toggleOptional,
   </div>;
 }
 
-function EmployeeEditor({ employee, teams, loading, error, onCancel, onSave }) {
+export function EmployeeEditor({ employee, teams, loading, error, onCancel, onSave }) {
   const [draft, setDraft] = useState(() => prepareEmployee(employee || emptyEmployee()));
   const selectedTeam = teams.find((team) => team.id === draft.teamId);
   const employeeLevel = draft.employeeType === "Senior" ? "senior" : "agent";
@@ -221,7 +221,7 @@ function EmployeeEditor({ employee, teams, loading, error, onCancel, onSave }) {
   </form>;
 }
 
-function EmploymentDateDialog({ action, employee, loading, error, onCancel, onConfirm }) {
+export function EmploymentDateDialog({ action, employee, loading, error, onCancel, onConfirm }) {
   const [date, setDate] = useState(todayValue());
   const archiveDate = dateInputValue(employee.resignDate);
   const isRestore = action === "restore";
@@ -241,26 +241,7 @@ function EmploymentDateDialog({ action, employee, loading, error, onCancel, onCo
   </div>;
 }
 
-function EmployeeRow({ employee, archived, canManage, canManageEmployees, onEdit, onResign, onRestore, onDelete, busy }) {
-  const tenureEnd = archived ? employee.resignDate : new Date();
-  return <tr>
-    <td data-label="Employee"><span className="employee-name-cell"><strong>{employee.fullName}</strong><small>{employee.employeeType}</small></span></td>
-    <td data-label="3CX">{employee.code3cx || <span className="employee-missing">—</span>}</td>
-    <td data-label="Awfar">{employee.awfarCode || <span className="employee-missing">—</span>}</td>
-    <td data-label="Awfar User">{employee.awfarUser || <span className="employee-missing">—</span>}</td>
-    <td data-label="Email">{employee.email || <span className="employee-missing">—</span>}</td>
-    <td data-label="Team"><span className="employee-team-cell"><Users size={14} />{employee.teamName}</span></td>
-    <td data-label="Hire date"><span className="employee-date-cell">{formatDate(employee.hireDate)}</span></td>
-    <td data-label="Status"><span className={`employee-status ${archived ? "resigned" : "active"}`}><i />{archived ? "Resigned" : "Active"}</span></td>
-    <td data-label="Resign date"><span className="employee-date-cell">{archived ? formatDate(employee.resignDate) : "—"}</span></td>
-    <td data-label="Tenure"><span className="employee-tenure"><Clock3 size={14} />{formatTenure(employee.hireDate, tenureEnd)}</span></td>
-    <td data-label="Actions">{canManageEmployees && <div className="employee-row-actions">
-      <button className="employee-action-button" type="button" onClick={() => onEdit(employee)} title="Edit employee" aria-label={`Edit ${employee.fullName}`}><Pencil size={15} /></button>
-      {archived ? <button className="employee-action-button restore" type="button" onClick={() => onRestore(employee)} title="Return employee" aria-label={`Return ${employee.fullName}`}><RotateCcw size={15} /></button> : <button className="employee-action-button resign" type="button" onClick={() => onResign(employee)} title="Record resignation" aria-label={`Resign ${employee.fullName}`}><UserMinus size={15} /></button>}
-      <button className="employee-action-button delete" type="button" onClick={() => onDelete(employee)} disabled={busy} title="Delete employee" aria-label={`Delete ${employee.fullName}`}><Trash2 size={15} /></button>
-    </div>}</td>
-  </tr>;
-}
+
 
 export default function EmployeesPage({ canManage = true, user }) {
   const [employees, setEmployees] = useState([]);
@@ -281,7 +262,7 @@ export default function EmployeesPage({ canManage = true, user }) {
   const [exporting, setExporting] = useState(false);
   const [exportMessage, setExportMessage] = useState("");
   const archived = view === "archive";
-  
+
   // Manager cannot manage employees
   const canManageEmployees = canManage && user?.role !== "Manager";
 
@@ -324,7 +305,7 @@ export default function EmployeesPage({ canManage = true, user }) {
   const filteredEmployees = useMemo(() => {
     const source = archived ? archivedEmployees : currentEmployees;
     const normalizedQuery = query.trim().toLocaleLowerCase();
-    return source.filter((employee) => {
+    let result = source.filter((employee) => {
       if (teamFilter !== "all" && employee.teamId !== teamFilter) return false;
       if (typeFilter !== "all" && employee.employeeType !== typeFilter) return false;
       const filterDate = parseDate(archived ? employee.resignDate : employee.hireDate);
@@ -335,18 +316,29 @@ export default function EmployeesPage({ canManage = true, user }) {
         if (!values.some((value) => String(value || "").toLocaleLowerCase().includes(normalizedQuery))) return false;
       }
       return true;
-    }).sort((left, right) => String(left.teamName).localeCompare(String(right.teamName)) || left.fullName.localeCompare(right.fullName));
+    });
+
+    // Sort by team first, then by name
+    result.sort((left, right) => {
+      const teamComparison = String(left.teamName || "Unassigned").localeCompare(String(right.teamName || "Unassigned"));
+      if (teamComparison !== 0) return teamComparison;
+      return String(left.fullName).localeCompare(String(right.fullName));
+    });
+
+    return result;
   }, [archived, archivedEmployees, currentEmployees, monthFilter, query, teamFilter, typeFilter, yearFilter]);
 
   const groupedEmployees = useMemo(() => {
     const groups = new Map();
     for (const employee of filteredEmployees) {
       const key = employee.teamId || "unassigned";
-      if (!groups.has(key)) groups.set(key, { name: employee.teamName, employees: [] });
+      if (!groups.has(key)) groups.set(key, { name: employee.teamName || "Unassigned", employees: [] });
       groups.get(key).employees.push(employee);
     }
     return [...groups.entries()];
   }, [filteredEmployees]);
+
+
 
   function resetFilters() {
     setQuery("");
@@ -571,64 +563,192 @@ export default function EmployeesPage({ canManage = true, user }) {
   }
 
   return <div className="employees-workspace">
-    <section className="employees-summary-grid" aria-label="Employee statistics">
-      <article className="employees-summary-card"><span className="employees-summary-icon forest"><Users size={19} /></span><div><span>Total employees</span><strong>{employees.length}</strong></div><small>All employment records</small></article>
-      <article className="employees-summary-card"><span className="employees-summary-icon mint"><Activity size={19} /></span><div><span>Active employees</span><strong>{currentEmployees.length}</strong></div><small>Currently working</small></article>
-      <article className="employees-summary-card"><span className="employees-summary-icon coral"><Archive size={19} /></span><div><span>Resigned employees</span><strong>{archivedEmployees.length}</strong></div><small>In employee archive</small></article>
-      <article className="employees-summary-card"><span className="employees-summary-icon blue"><CalendarDays size={19} /></span><div><span>Hired this year</span><strong>{hiresThisYear}</strong></div><small>Since January {thisYear}</small></article>
+    {/* Header Section */}
+    <div className="employees-header">
+      <div className="employees-header-left">
+        <h1 className="employees-title">{archived ? "Employee Archive" : "Employees"}</h1>
+        <p className="employees-subtitle">{archived ? "View and manage resigned employee records" : "Manage your team members and their details"}</p>
+      </div>
+      <div className="employees-header-actions">
+        <button className="employees-view-toggle" onClick={() => { setView(archived ? "current" : "archive"); resetFilters(); setError(""); setExportMessage(""); }}>
+          {archived ? <Activity size={18} /> : <Archive size={18} />}
+          {archived ? "Current" : "Archive"}
+        </button>
+        {canManage && !archived && <button className="employees-add-button" onClick={openCreate}><Plus size={18} /> Add Employee</button>}
+        <button className="employees-export-button" onClick={() => void exportEmployees()} disabled={loading || exporting || filteredEmployees.length === 0}>
+          <FileSpreadsheet size={18} />
+          {exporting ? "Exporting..." : "Export"}
+        </button>
+      </div>
+    </div>
+
+    {/* Stats Cards */}
+    <section className="employees-stats-grid">
+      <div className="employees-stat-card total">
+        <div className="employees-stat-icon"><Users size={24} /></div>
+        <div className="employees-stat-content">
+          <span className="employees-stat-label">Total</span>
+          <strong className="employees-stat-value">{employees.length}</strong>
+        </div>
+      </div>
+      <div className="employees-stat-card active">
+        <div className="employees-stat-icon"><Activity size={24} /></div>
+        <div className="employees-stat-content">
+          <span className="employees-stat-label">Active</span>
+          <strong className="employees-stat-value">{currentEmployees.length}</strong>
+        </div>
+      </div>
+      <div className="employees-stat-card resigned">
+        <div className="employees-stat-icon"><Archive size={24} /></div>
+        <div className="employees-stat-content">
+          <span className="employees-stat-label">Resigned</span>
+          <strong className="employees-stat-value">{archivedEmployees.length}</strong>
+        </div>
+      </div>
+      <div className="employees-stat-card new">
+        <div className="employees-stat-icon"><CalendarDays size={24} /></div>
+        <div className="employees-stat-content">
+          <span className="employees-stat-label">New This Year</span>
+          <strong className="employees-stat-value">{hiresThisYear}</strong>
+        </div>
+      </div>
     </section>
 
-    <section className="employee-directory">
-      <header className="employee-directory-toolbar"><div><span className="employee-eyebrow">PEOPLE OPERATIONS</span><h2>{archived ? "Employee archive" : "Employees"}<span>{filteredEmployees.length}</span></h2><p>{archived ? "Browse previous employment records and return employees." : "Current employees organized by their assigned team."}</p></div><div className="employee-toolbar-actions"><button className="employee-export-button" type="button" onClick={() => void exportEmployees()} disabled={loading || exporting || filteredEmployees.length === 0}><FileSpreadsheet size={16} />{exporting ? "Preparing Excel..." : "Export Excel"}</button><button className={`employee-archive-button ${archived ? "selected" : ""}`} type="button" onClick={() => { setView(archived ? "current" : "archive"); resetFilters(); setError(""); setExportMessage(""); }}><Archive size={16} />{archived ? "Current employees" : "Archive"}</button>{canManage && !archived && <button className="employee-add-button" type="button" onClick={openCreate}><Plus size={17} /> Add employee</button>}</div></header>
-      {error && mode === "list" && <div className="employee-error" role="alert"><CircleAlert size={16} />{error}<button type="button" onClick={() => setError("")} aria-label="Dismiss"><X size={15} /></button></div>}
+    {/* Main Content */}
+    <section className="employees-main-content">
+      {error && <div className="employees-error-banner"><CircleAlert size={18} />{error}<button onClick={() => setError("")}><X size={16} /></button></div>}
 
-      <div className="employee-filter-bar">
-        <label className="employee-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, codes, Awfar user, email or team" aria-label="Search employees" /></label>
-        <label className="employee-filter"><span>Team</span><select value={teamFilter} onChange={(event) => setTeamFilter(event.target.value)}><option value="all">All teams</option>{teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</select></label>
-        <label className="employee-filter"><span>Type</span><select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}><option value="all">All types</option><option value="Agent">Agent</option><option value="Senior">Senior</option></select></label>
-        <label className="employee-filter"><span>{archived ? "Resigned year" : "Hire year"}</span><select value={yearFilter} onChange={(event) => setYearFilter(event.target.value)}><option value="all">All years</option>{availableYears.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
-        {archived && <label className="employee-filter"><span>Month</span><select value={monthFilter} onChange={(event) => setMonthFilter(event.target.value)}><option value="all">All months</option>{Array.from({ length: 12 }, (_, month) => <option key={month} value={month}>{new Date(Date.UTC(2000, month, 1)).toLocaleDateString("en-US", { month: "long", timeZone: "UTC" })}</option>)}</select></label>}
+      {/* Filters Toolbar */}
+      <div className="employees-toolbar">
+        <div className="employees-search-wrapper">
+          <Search size={18} className="employees-search-icon" />
+          <input
+            className="employees-search-input"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search employees by name, code, email..."
+          />
+        </div>
+        <div className="employees-filters">
+          <select className="employees-filter-select" value={teamFilter} onChange={(event) => setTeamFilter(event.target.value)}>
+            <option value="all">All Teams</option>
+            {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+          </select>
+          <select className="employees-filter-select" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
+            <option value="all">All Types</option>
+            <option value="Agent">Agent</option>
+            <option value="Senior">Senior</option>
+          </select>
+          <select className="employees-filter-select" value={yearFilter} onChange={(event) => setYearFilter(event.target.value)}>
+            <option value="all">All Years</option>
+            {availableYears.map((year) => <option key={year} value={year}>{year}</option>)}
+          </select>
+          {archived && <select className="employees-filter-select" value={monthFilter} onChange={(event) => setMonthFilter(event.target.value)}>
+            <option value="all">All Months</option>
+            {Array.from({ length: 12 }, (_, month) => <option key={month} value={month}>{new Date(Date.UTC(2000, month, 1)).toLocaleDateString("en-US", { month: "long", timeZone: "UTC" })}</option>)}
+          </select>}
+          {(query || teamFilter !== "all" || typeFilter !== "all" || yearFilter !== "all" || monthFilter !== "all") && (
+            <button className="employees-clear-filters" onClick={resetFilters}>Clear All</button>
+          )}
+        </div>
       </div>
 
-      {exportMessage && <div className="employee-export-message" role="status">{exportMessage}</div>}
-      <div className="employee-results-bar"><span><strong>{filteredEmployees.length}</strong> {filteredEmployees.length === 1 ? "employee" : "employees"} {archived ? "in archive" : "in current view"}</span>{(query || teamFilter !== "all" || typeFilter !== "all" || yearFilter !== "all" || monthFilter !== "all") && <button type="button" onClick={resetFilters}>Clear filters <X size={14} /></button>}</div>
+      {exportMessage && <div className="employees-success-message">{exportMessage}</div>}
 
+      {/* Results Count */}
+      <div className="employees-results-count">
+        <span>Showing <strong>{filteredEmployees.length}</strong> of <strong>{archived ? archivedEmployees.length : currentEmployees.length}</strong> employees</span>
+      </div>
+
+      {/* Table */}
       {loading ? (
-        <div className="employee-loading"><span className="employee-spinner" /> Loading employees...</div>
+        <div className="employees-loading-state">
+          <div className="employees-spinner" />
+          <span>Loading employees...</span>
+        </div>
       ) : filteredEmployees.length === 0 ? (
-        <div className="employee-empty-state">
-          <span className="employee-empty-icon">{archived ? <FileClock size={24} /> : <Users size={24} />}</span>
-          <h3>{archived ? "No resigned employees" : "No employees yet"}</h3>
-          <p>{archived ? "Resigned employees will appear here with their employment history." : canManageEmployees ? "Add your first employee to start tracking team membership and tenure." : "There are no employees to display."}</p>
-          {canManageEmployees && !archived && <button className="employee-add-button" type="button" onClick={openCreate} disabled={!teams.length}><Plus size={16} />{teams.length ? "Add first employee" : "Create a team first"}</button>}
+        <div className="employees-empty-state">
+          <div className="employees-empty-icon">{archived ? <FileClock size={48} /> : <Users size={48} />}</div>
+          <h3>{archived ? "No resigned employees" : "No employees found"}</h3>
+          <p>{archived ? "Resigned employees will appear here with their employment history." : canManageEmployees ? "Add your first employee to get started" : "There are no employees to display."}</p>
+          {canManageEmployees && !archived && <button className="employees-add-button" onClick={openCreate} disabled={!teams.length}><Plus size={18} />{teams.length ? "Add First Employee" : "Create a Team First"}</button>}
         </div>
       ) : (
-        <div className="employee-table-viewport">
-          <table className="employee-table">
-            <thead><tr><th>EMPLOYEE</th><th>3CX</th><th>AWFAR CODE</th><th>AWFAR USER</th><th>EMAIL</th><th>TEAM</th><th>HIRE DATE</th><th>STATUS</th><th>RESIGN DATE</th><th>TENURE</th><th>ACTIONS</th></tr></thead>
+        <div className="employees-table-container">
+          <table className="employees-table">
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>3CX</th>
+                <th>Awfar Code</th>
+                <th>Awfar User</th>
+                <th>Email</th>
+                <th>Team</th>
+                <th>Hire Date</th>
+                <th>Status</th>
+                {archived && <th>Resign Date</th>}
+                <th>Tenure</th>
+                <th className="employees-actions-cell">Actions</th>
+              </tr>
+            </thead>
             {groupedEmployees.map(([groupId, group]) => (
-              <tbody key={groupId} className="employee-team-group">
-                <tr className="employee-team-heading"><th colSpan={11}><span className="employee-team-heading-icon"><Users size={15} /></span>{group.name}<span>{group.employees.length} {group.employees.length === 1 ? "employee" : "employees"}</span></th></tr>
+              <tbody key={groupId} className="employees-team-group">
+                <tr className="employees-team-heading">
+                  <th colSpan={archived ? 11 : 10}>
+                    <div className="employees-team-header">
+                      <span className="employees-team-heading-icon"><Users size={16} /></span>
+                      <span className="employees-team-name">{group.name}</span>
+                      <span className="employees-team-count">{group.employees.length} {group.employees.length === 1 ? "employee" : "employees"}</span>
+                    </div>
+                  </th>
+                </tr>
                 {group.employees.map((employee) => (
-                  <EmployeeRow
-                    key={employee.id}
-                    employee={employee}
-                    archived={archived}
-                    canManage={canManage}
-                    canManageEmployees={canManageEmployees}
-                    onEdit={openEdit}
-                    onResign={(item) => { setError(""); setDateAction({ action: "resign", employee: item }); }}
-                    onRestore={(item) => { setError(""); setDateAction({ action: "restore", employee: item }); }}
-                    onDelete={(item) => void deleteEmployee(item)}
-                    busy={busyEmployee === employee.id}
-                  />
+                  <tr key={employee.id} className="employees-table-row">
+                    <td>
+                      <div className="employees-name-cell">
+                        <strong>{employee.fullName}</strong>
+                        <span className="employees-type-badge">{employee.employeeType}</span>
+                      </div>
+                    </td>
+                    <td>{employee.code3cx || <span className="employees-missing">—</span>}</td>
+                    <td>{employee.awfarCode || <span className="employees-missing">—</span>}</td>
+                    <td>{employee.awfarUser || <span className="employees-missing">—</span>}</td>
+                    <td>{employee.email || <span className="employees-missing">—</span>}</td>
+                    <td>
+                      <div className="employees-team-cell">
+                        <Users size={14} />
+                        {employee.teamName || "Unassigned"}
+                      </div>
+                    </td>
+                    <td className="employees-date-cell">{formatDate(employee.hireDate)}</td>
+                    <td>
+                      <span className={`employees-status-badge ${archived ? "resigned" : "active"}`}>
+                        {archived ? "Resigned" : "Active"}
+                      </span>
+                    </td>
+                    {archived && <td className="employees-date-cell">{formatDate(employee.resignDate)}</td>}
+                    <td className="employees-tenure-cell">
+                      <Clock3 size={14} />
+                      {formatTenure(employee.hireDate, archived ? employee.resignDate : new Date())}
+                    </td>
+                    <td className="employees-actions-cell">
+                      {canManageEmployees && <div className="employees-row-actions">
+                        <button className="employees-action-btn edit" onClick={() => openEdit(employee)} title="Edit"><Pencil size={16} /></button>
+                        {archived ? (
+                          <button className="employees-action-btn restore" onClick={() => { setError(""); setDateAction({ action: "restore", employee }); }} title="Restore"><RotateCcw size={16} /></button>
+                        ) : (
+                          <button className="employees-action-btn resign" onClick={() => { setError(""); setDateAction({ action: "resign", employee }); }} title="Resign"><UserMinus size={16} /></button>
+                        )}
+                        <button className="employees-action-btn delete" onClick={() => void deleteEmployee(employee)} disabled={busyEmployee === employee.id} title="Delete"><Trash2 size={16} /></button>
+                      </div>}
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             ))}
           </table>
         </div>
       )}
-      <footer className="employee-directory-footer"><span><i /> Dates use your local display timezone</span><span>{archived ? "Employment history is retained when an employee returns." : "Tenure is calculated from hire date through today."}</span></footer>
     </section>
 
     {dateAction && canManageEmployees && <EmploymentDateDialog action={dateAction.action} employee={dateAction.employee} loading={saving} error={error} onCancel={() => { setDateAction(null); setError(""); }} onConfirm={updateEmploymentDate} />}

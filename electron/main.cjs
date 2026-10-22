@@ -486,8 +486,38 @@ ipcMain.handle("auth:login", async (event, credentials) => {
       isActive: { $ne: false },
     });
 
+    // Check if account is locked
+    if (user && user.isLocked) {
+      return { ok: false, message: "This account has been locked due to multiple failed login attempts. Please contact an administrator." };
+    }
+
     if (!user || typeof user.passwordHash !== "string" || !(await bcrypt.compare(password, user.passwordHash))) {
+      // Increment failed login attempts
+      if (user && user.role !== "Admin") {
+        const failedAttempts = (user.failedLoginAttempts || 0) + 1;
+        const update = { $set: { failedLoginAttempts: failedAttempts } };
+        
+        // Lock account after 3 failed attempts
+        if (failedAttempts >= 3) {
+          update.$set.isLocked = true;
+          update.$set.lockedAt = new Date();
+        }
+        
+        await database.collection("users").updateOne({ _id: user._id }, update);
+        
+        if (failedAttempts >= 3) {
+          return { ok: false, message: "This account has been locked due to multiple failed login attempts. Please contact an administrator." };
+        }
+      }
+      
       return { ok: false, message: "The username or password is incorrect." };
+    }
+
+    // Reset failed login attempts on successful login
+    if (user.role !== "Admin") {
+      await database.collection("users").updateOne({ _id: user._id }, {
+        $set: { failedLoginAttempts: 0, isLocked: false, lockedAt: null }
+      });
     }
 
     const allowedRoles = ["Admin", "Quality", "Team Leader", "Manager"];
@@ -756,20 +786,25 @@ ipcMain.handle("settings:3cx-import-talking-time", async (event, input = {}) => 
           continue;
         }
         const calls = Math.max(0, Number(row.InboundAnsweredCount) || 0) + Math.max(0, Number(row.OutboundAnsweredCount) || 0);
+        // Try different possible field names for missed calls
+        const inboundMissed = Number(row.InboundMissedCount || row.InboundUnansweredCount || row.InboundMissed || 0);
+        const outboundMissed = Number(row.OutboundMissedCount || row.OutboundUnansweredCount || row.OutboundMissed || 0);
+        const missedCalls = Math.max(0, inboundMissed) + Math.max(0, outboundMissed);
         const seconds = Math.round(parse3cxDuration(row.InboundAnsweredTalkingDur) + parse3cxDuration(row.OutboundAnsweredTalkingDur));
-        if (!totalsByEmployee.has(employee._id.toString())) totalsByEmployee.set(employee._id.toString(), { employee, calls: 0, seconds: 0 });
+        if (!totalsByEmployee.has(employee._id.toString())) totalsByEmployee.set(employee._id.toString(), { employee, calls: 0, missedCalls: 0, seconds: 0 });
         const totals = totalsByEmployee.get(employee._id.toString());
         totals.calls += calls;
+        totals.missedCalls += missedCalls;
         totals.seconds += seconds;
       }
 
       const month = date.slice(0, 7);
-      await Promise.all([...totalsByEmployee.values()].map(async ({ employee, calls, seconds }) => {
+      await Promise.all([...totalsByEmployee.values()].map(async ({ employee, calls, missedCalls, seconds }) => {
         const now = new Date();
         const operations = [];
-        if (calls > 0) operations.push(callEntries.updateOne(
+        if (calls > 0 || missedCalls > 0) operations.push(callEntries.updateOne(
           { employeeId: employee._id, date },
-          { $inc: { calls }, $set: { employeeId: employee._id, teamId: employee.teamId, date, month, status: null, updatedAt: now }, $setOnInsert: { createdAt: now } },
+          { $inc: { calls, missedCalls }, $set: { employeeId: employee._id, teamId: employee.teamId, date, month, status: null, updatedAt: now }, $setOnInsert: { createdAt: now } },
           { upsert: true },
         ));
         if (seconds > 0) operations.push(talkingEntries.updateOne(
@@ -925,20 +960,22 @@ ipcMain.handle("settings:afwar-import-talking-time", async (event, input = {}) =
           continue;
         }
         const calls = Math.max(0, Number(entry.answered) || 0);
+        const unansweredCalls = Math.max(0, Number(entry.unanswered) || 0);
         const seconds = Math.max(0, Number(entry.total_talk_sec) || 0);
-        if (!totalsByEmployee.has(employee._id.toString())) totalsByEmployee.set(employee._id.toString(), { employee, calls: 0, seconds: 0 });
+        if (!totalsByEmployee.has(employee._id.toString())) totalsByEmployee.set(employee._id.toString(), { employee, calls: 0, missedCalls: 0, seconds: 0 });
         const totals = totalsByEmployee.get(employee._id.toString());
         totals.calls += calls;
+        totals.missedCalls += unansweredCalls;
         totals.seconds += seconds;
       }
 
       const month = date.slice(0, 7);
-      await Promise.all([...totalsByEmployee.values()].map(async ({ employee, calls, seconds }) => {
+      await Promise.all([...totalsByEmployee.values()].map(async ({ employee, calls, missedCalls, seconds }) => {
         const now = new Date();
         const operations = [];
-        if (calls > 0) operations.push(callEntries.updateOne(
+        if (calls > 0 || missedCalls > 0) operations.push(callEntries.updateOne(
           { employeeId: employee._id, date },
-          { $inc: { calls }, $set: { employeeId: employee._id, teamId: employee.teamId, date, month, status: null, updatedAt: now }, $setOnInsert: { createdAt: now } },
+          { $inc: { calls, missedCalls }, $set: { employeeId: employee._id, teamId: employee.teamId, date, month, status: null, updatedAt: now }, $setOnInsert: { createdAt: now } },
           { upsert: true },
         ));
         if (seconds > 0) operations.push(talkingEntries.updateOne(
@@ -1082,16 +1119,28 @@ ipcMain.handle("awfar-kanban:summary", async (event) => {
           name: campaign.name,
           counts: Object.fromEntries(awfarKanbanStatuses.map((status) => [
             status.key,
-            counts.get(`${campaign.name}\u0000${status.key}`)?.get(agentKey) || 0,
+            counts.get(`${campaign.name}\u0000${status.key}`)?.counts?.get(agentKey) || 0,
           ])),
         })),
       };
     });
+
+    // Calculate campaign totals including unassigned cases
+    const campaignTotals = {};
+    for (const campaign of awfarKanbanCampaigns) {
+      campaignTotals[campaign.name] = { statusTotals: {} };
+      for (const status of awfarKanbanStatuses) {
+        const result = counts.get(`${campaign.name}\u0000${status.key}`);
+        campaignTotals[campaign.name].statusTotals[status.key] = result?.totalCount || 0;
+      }
+    }
+
     return {
       ok: true,
       campaigns: awfarKanbanCampaigns,
       statuses: awfarKanbanStatuses,
       employees: rows,
+      campaignTotals,
       failedJobs,
       fetchedAt: new Date().toISOString(),
     };
@@ -1226,7 +1275,7 @@ ipcMain.handle("settings:accounts-list", async (event, actorId) => {
     if (actor?.role !== "Admin") return { ok: false, message: "Only an active Admin can manage accounts." };
     const now = new Date();
     const accounts = await database.collection("users").find({}, {
-      projection: { name: 1, username: 1, email: 1, role: 1, permissions: 1, isActive: 1, createdAt: 1, lastSeenAt: 1, onlineUntil: 1 },
+      projection: { name: 1, username: 1, email: 1, role: 1, permissions: 1, isActive: 1, createdAt: 1, lastSeenAt: 1, onlineUntil: 1, isLocked: 1, failedLoginAttempts: 1, lockedAt: 1 },
     }).sort({ role: 1, name: 1, username: 1 }).toArray();
     return { ok: true, accounts: accounts.map((account) => ({
       id: String(account._id), name: String(account.name || account.username || account.email || "User"),
@@ -1235,6 +1284,7 @@ ipcMain.handle("settings:accounts-list", async (event, actorId) => {
       teamIds: Array.isArray(account.teamIds) ? account.teamIds.map((id) => String(id)) : [],
       isActive: account.isActive !== false, online: account.isActive !== false && account.onlineUntil instanceof Date && account.onlineUntil > now,
       lastSeenAt: account.lastSeenAt || null, createdAt: account.createdAt || null,
+      isLocked: account.isLocked || false, failedLoginAttempts: account.failedLoginAttempts || 0, lockedAt: account.lockedAt || null,
     })) };
   } catch (error) {
     console.error("Could not load accounts:", error.message);
@@ -1330,6 +1380,24 @@ ipcMain.handle("settings:account-freeze", async (event, input = {}) => {
   } catch (error) {
     console.error("Could not update account status:", error.message);
     return { ok: false, message: "Account status could not be changed. Check the database connection and try again." };
+  }
+});
+
+ipcMain.handle("settings:account-unlock", async (event, input = {}) => {
+  try {
+    const database = await getDatabase();
+    const actor = await findSettingsActor(database, event, input.actorId);
+    if (actor?.role !== "Admin") return { ok: false, message: "Only an active Admin can manage accounts." };
+    const targetId = String(input.id || "");
+    if (!ObjectId.isValid(targetId)) return { ok: false, message: "This account is no longer available." };
+    const users = database.collection("users");
+    const target = await users.findOne({ _id: new ObjectId(targetId) });
+    if (!target) return { ok: false, message: "This account no longer exists." };
+    await users.updateOne({ _id: target._id }, { $set: { isLocked: false, failedLoginAttempts: 0, lockedAt: null, updatedAt: new Date() } });
+    return { ok: true };
+  } catch (error) {
+    console.error("Could not unlock account:", error.message);
+    return { ok: false, message: "Account could not be unlocked. Check the database connection and try again." };
   }
 });
 
@@ -2615,7 +2683,7 @@ ipcMain.handle("calls-tracking:list", async (event, monthValue) => {
     for (const entry of callEntries) {
       const employeeKey = entry.employeeId.toString();
       if (!entryByEmployee.has(employeeKey)) entryByEmployee.set(employeeKey, {});
-      entryByEmployee.get(employeeKey)[entry.date] = { calls: Number(entry.calls || 0), status: entry.status || null };
+      entryByEmployee.get(employeeKey)[entry.date] = { calls: Number(entry.calls || 0), missedCalls: Number(entry.missedCalls || 0), status: entry.status || null };
     }
     const teamsById = new Map(teamDocuments.map((team) => [team._id.toString(), {
       id: team._id.toString(), name: team.teamName,
@@ -2657,8 +2725,10 @@ ipcMain.handle("calls-tracking:save", async (event, input = {}) => {
       await entries.deleteOne({ employeeId: employee._id, date });
       return { ok: true, calls: 0, status: null };
     }
-    await entries.updateOne({ employeeId: employee._id, date }, { $set: { employeeId: employee._id, teamId: employee.teamId, date, month, calls: status ? 0 : calls, status, updatedAt: new Date() }, $setOnInsert: { createdAt: new Date() } }, { upsert: true });
-    return { ok: true, calls: status ? 0 : calls, status };
+    const existing = await entries.findOne({ employeeId: employee._id, date });
+    const missedCalls = existing?.missedCalls || 0;
+    await entries.updateOne({ employeeId: employee._id, date }, { $set: { employeeId: employee._id, teamId: employee.teamId, date, month, calls: status ? 0 : calls, missedCalls, status, updatedAt: new Date() }, $setOnInsert: { createdAt: new Date() } }, { upsert: true });
+    return { ok: true, calls: status ? 0 : calls, missedCalls, status };
   } catch (error) {
     if (error instanceof EmployeeValidationError) return { ok: false, message: error.message };
     console.error("Could not save call entry:", error.message);
@@ -3826,9 +3896,11 @@ ipcMain.handle("dashboard:send-email", async (event, input = {}) => {
         else if (col.key === "hireDate") value = employee.hireDate ? new Date(employee.hireDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—";
         else if (col.key === "sales") value = `${Number(employee.sales || 0).toLocaleString()} (${employee.salesZone || "N/A"})`;
         else if (col.key === "dailyCalls") value = Number(employee.dailyCalls || 0).toLocaleString();
+        else if (col.key === "dailyMissedCalls") value = Number(employee.dailyMissedCalls || 0).toLocaleString();
         else if (col.key === "dailyTalkingTime") value = formatTime(employee.dailyTalkingTime);
         else if (col.key === "monthlyTalkingTime") value = formatTime(employee.monthlyTalkingTime);
         else if (col.key === "monthlyCalls") value = Number(employee.monthlyCalls || 0).toLocaleString();
+        else if (col.key === "monthlyMissedCalls") value = Number(employee.monthlyMissedCalls || 0).toLocaleString();
         else if (col.key === "talkingTimePercent") value = `${formatNumber(employee.talkingTimePercent)}%`;
         else if (col.key === "callsPercent") value = `${formatNumber(employee.callsPercent)}%`;
         else if (col.key === "qualityPercent") value = `${formatNumber(employee.qualityPercent, 2)}%`;
@@ -4607,10 +4679,13 @@ ipcMain.handle("updater:install", async () => {
   }
 });
 
-// Auto-updater configuration
-autoUpdater.setFeedURL({
-  provider: "generic",
-  url: "https://masar-indol-nine.vercel.app/updates",
+ipcMain.handle("updater:getVersion", async () => {
+  try {
+    return { ok: true, version: app.getVersion() };
+  } catch (error) {
+    console.error("Get version failed:", error);
+    return { ok: false, message: error.message };
+  }
 });
 
 // Auto-updater event listeners

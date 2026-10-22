@@ -23,6 +23,19 @@ function formatDate(dateString) {
   return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
+function getMonthsSinceHire(hireDate) {
+  if (!hireDate) return 0;
+  const hire = new Date(hireDate);
+  if (Number.isNaN(hire.getTime())) return 0;
+
+  const now = new Date();
+  const years = now.getFullYear() - hire.getFullYear();
+  const months = now.getMonth() - hire.getMonth();
+  const totalMonths = years * 12 + months;
+
+  return totalMonths >= 0 ? totalMonths : 0;
+}
+
 function formatNumber(value, digits = 1) {
   if (value === undefined || value === null || value === "") return "—";
   const number = Number(value);
@@ -136,19 +149,29 @@ export default function AlertsPage() {
   const filteredEmployees = useMemo(() => {
     if (!alertsData?.employees) return [];
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return alertsData.employees;
-    
+
     return alertsData.employees.filter((employee) => {
-      const searchFields = [
-        employee.fullName,
-        employee.code3cx,
-        employee.awfarCode,
-        employee.teamName,
-      ].map((value) => String(value || "").toLowerCase());
-      
-      return searchFields.some((field) => field.includes(query));
+      // Filter out employees who haven't completed the selected period
+      const monthsSinceHire = getMonthsSinceHire(employee.hireDate);
+      if (monthsSinceHire < months) {
+        return false;
+      }
+
+      // Apply search filter if query exists
+      if (query) {
+        const searchFields = [
+          employee.fullName,
+          employee.code3cx,
+          employee.awfarCode,
+          employee.teamName,
+        ].map((value) => String(value || "").toLowerCase());
+
+        return searchFields.some((field) => field.includes(query));
+      }
+
+      return true;
     });
-  }, [alertsData, searchQuery]);
+  }, [alertsData, searchQuery, months]);
 
   const handleViewEmployeeData = (employee) => {
     setSelectedEmployee(employee);
