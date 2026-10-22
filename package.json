@@ -1,6 +1,6 @@
 {
   "name": "Northstar-Quality-Operations",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "private": true,
   "description": "Quality operations desktop workspace",
   "main": "electron/main.cjs",
@@ -45,13 +45,13 @@
     ],
     "win": {
       "icon": "quality-assurance.ico",
-      "artifactName": "${productName} Setup ${version}.${ext}",
+      "artifactName": "Northstar-Quality-Operations-Setup-${version}.${ext}",
       "target": [
         "nsis"
       ]
     },
     "nsis": {
-      "artifactName": "${productName} Setup ${version}.${ext}",
+      "artifactName": "Northstar-Quality-Operations-Setup-${version}.${ext}",
       "installerIcon": "quality-assurance.ico",
       "uninstallerIcon": "quality-assurance.ico",
       "installerHeaderIcon": "quality-assurance.ico",
