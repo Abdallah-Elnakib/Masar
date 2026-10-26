@@ -1,6 +1,6 @@
 {
   "name": "Northstar-Quality-Operations",
-  "version": "3.1.1",
+  "version": "4.1.2",
   "private": true,
   "description": "Quality operations desktop workspace",
   "main": "electron/main.cjs",
@@ -49,6 +49,9 @@
       "target": [
         "nsis"
       ]
+    },
+    "releaseInfo": {
+      "releaseNotesFile": "release-notes.md"
     },
     "nsis": {
       "artifactName": "Northstar-Quality-Operations-Setup-${version}.${ext}",
