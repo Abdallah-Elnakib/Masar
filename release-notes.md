@@ -1,3 +1,3 @@
-# Release v4.2.4
+# Release v4.2.5
 
-Team leder
+Ticket #53BF5D – Resolution and Recommended Update
