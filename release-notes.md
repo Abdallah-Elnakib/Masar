@@ -1,3 +1,3 @@
-# Release v4.2.5
+# Release v4.3.1
 
-Ticket #53BF5D – Resolution and Recommended Update
+Device permissions
