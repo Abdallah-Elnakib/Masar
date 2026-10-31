@@ -1,3 +1,3 @@
-# Release v4.5.8
+# Release v4.5.9
 
-Modifying Awfar's number tracking system to rely on their API instead of using accounts
+Awfar is not configured. Set AWFAR_PLATFORM_API_TOKEN in the application .env file.
