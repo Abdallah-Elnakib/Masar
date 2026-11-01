@@ -1,3 +1,3 @@
-# Release v4.5.12
+# Release v4.5.13
 
-Central Awfar service is missing its database configuration.
+Fixing the date issue on the Red Zone Report page
