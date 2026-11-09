@@ -1,3 +1,3 @@
-# Release v5.2.1
+# Release v5.2.2
 
-Ai Lockal
+Email Handel Error
