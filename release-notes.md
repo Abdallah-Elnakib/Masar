@@ -1,3 +1,3 @@
-# Release v5.2.2
+# Release v5.2.3
 
-Email Handel Error
+Email Error
