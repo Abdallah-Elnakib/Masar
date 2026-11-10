@@ -1,3 +1,3 @@
-# Release v5.2.5
+# Release v5.2.6
 
-Call & Selas
+Handel
