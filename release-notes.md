@@ -1,3 +1,3 @@
-# Release v5.2.6
+# Release v5.2.7
 
-Handel
+Critical Call
