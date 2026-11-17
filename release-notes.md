@@ -1,3 +1,3 @@
-# Release v5.7.1
+# Release v5.7.2
 
-Update
+Settlements
