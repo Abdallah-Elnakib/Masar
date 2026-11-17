@@ -1,3 +1,3 @@
-# Release v5.7.3
+# Release v5.7.4
 
-Manager & Team Leader Settlements
+included in this update
