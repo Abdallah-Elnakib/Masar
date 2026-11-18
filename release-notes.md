@@ -1,3 +1,3 @@
-# Release v5.7.6
+# Release v5.7.7
 
-Handel Quality Access
+Modifying the body when the status is "Awaiting quality confirmation"
