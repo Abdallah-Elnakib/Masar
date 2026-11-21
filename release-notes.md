@@ -1,3 +1,3 @@
-# Release v5.7.7
+# Release v5.7.8
 
-Modifying the body when the status is "Awaiting quality confirmation"
+Response Time Page
