@@ -1,3 +1,3 @@
-# Release v5.7.8
+# Release v5.7.9
 
-Response Time Page
+Range

@@ -1,6 +1,6 @@
 {
   "name": "Northstar-Quality-Operations",
-  "version": "5.7.8",
+  "version": "5.7.9",
   "private": true,
   "description": "Quality operations desktop workspace",
   "main": "electron/main.cjs",
