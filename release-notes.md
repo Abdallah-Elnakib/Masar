@@ -1,3 +1,3 @@
-# Release v5.7.9
+# Release v5.7.10
 
-Range
+Prevent the re-evaluation of a call that has already been evaluated
